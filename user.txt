@@ -1,0 +1,19 @@
+[
+  { name: "Admin", email: "admin@example.com", password: "12345678", is_admin: true }
+  {
+        name: "Root",
+        email: "root@example.com",
+        password: "12345678",
+        is_admin: true,
+      },
+  { name: "Liam Bennett", email: "liam.bennett@example.com", password: "Li@4mB8!gH", is_admin: false },
+  { name: "Emma Collins", email: "emma.collins@example.com", password: "EmC@8937&J", is_admin: false },
+  { name: "Olivia Martin", email: "olivia.martin@example.com", password: "Ol_Mart#56H", is_admin: false },
+  { name: "Noah Evans", email: "noah.evans@example.com", password: "NoahEv@82$k", is_admin: false },
+  { name: "Ava Thompson", email: "ava.thompson@example.com", password: "A.vT22#90k", is_admin: false },
+  { name: "William Brooks", email: "william.brooks@example.com", password: "WbRoks!78*Q", is_admin: false },
+  { name: "Sophia Anderson", email: "sophia.anderson@example.com", password: "So.Andy92$!", is_admin: false },
+  { name: "James Carter", email: "james.carter@example.com", password: "JCarT!7392", is_admin: true },
+  { name: "Mia Harris", email: "mia.harris@example.com", password: "MiH@9973$L", is_admin: false },
+  { name: "Lucas Wright", email: "lucas.wright@example.com", password: "LWright_83&b", is_admin: false },
+];
