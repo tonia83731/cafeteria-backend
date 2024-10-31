@@ -14,6 +14,12 @@ module.exports = (sequelize, DataTypes) => {
   );
   SugarOptions.associate = function (models) {
     // associations can be defined here
+    SugarOptions.hasMany(models.CartItem, {
+      foreignKey: "sugarOptionId",
+    });
+    SugarOptions.hasMany(models.OrderItem, {
+      foreignKey: "sugarOptionId",
+    });
   };
   return SugarOptions;
 };

@@ -7,18 +7,6 @@ const categoryController = {
       console.log(error);
     }
   },
-  addCategory: async (req, res, next) => {
-    try {
-    } catch (error) {
-      console.log(error);
-    }
-  },
-  deleteCategory: async (req, res, next) => {
-    try {
-    } catch (error) {
-      console.log(error);
-    }
-  },
 };
 
 module.exports = categoryController;

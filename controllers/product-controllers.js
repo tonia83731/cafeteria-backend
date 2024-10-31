@@ -1,8 +1,9 @@
-const { Product, Category } = require("../models");
+const { Product, Category, Wish } = require("../models");
 
 const productController = {
   getProduct: async (req, res, next) => {
     try {
+      const { productId } = req.params;
     } catch (error) {
       console.log(error);
     }
@@ -13,19 +14,20 @@ const productController = {
       console.log(error);
     }
   },
-  addProduct: async (req, res, next) => {
+  addWish: async (req, res, next) => {
     try {
+      const { productId } = req.params;
+      const [product, wish] = await Promise.all([
+        Product.findByPk(productId),
+        Wish.findOne({
+          where: {},
+        }),
+      ]);
     } catch (error) {
       console.log(error);
     }
   },
-  updateProduct: async (req, res, next) => {
-    try {
-    } catch (error) {
-      console.log(error);
-    }
-  },
-  deleteProduct: async (req, res, next) => {
+  removeWish: async (req, res, next) => {
     try {
     } catch (error) {
       console.log(error);

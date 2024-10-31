@@ -14,6 +14,12 @@ module.exports = (sequelize, DataTypes) => {
   );
   IceOptions.associate = function (models) {
     // associations can be defined here
+    IceOptions.hasMany(models.CartItem, {
+      foreignKey: "iceOptionId",
+    });
+    IceOptions.hasMany(models.OrdertItem, {
+      foreignKey: "iceOptionId",
+    });
   };
   return IceOptions;
 };

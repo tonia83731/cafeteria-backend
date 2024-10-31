@@ -14,6 +14,12 @@ module.exports = (sequelize, DataTypes) => {
   );
   SizeOptions.associate = function (models) {
     // associations can be defined here
+    SizeOptions.hasMany(models.CartItem, {
+      foreignKey: "sizeOptionId",
+    });
+    SizeOptions.hasMany(models.OrderItem, {
+      foreignKey: "sizeOptionId",
+    });
   };
   return SizeOptions;
 };

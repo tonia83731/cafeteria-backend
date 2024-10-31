@@ -18,6 +18,10 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Headers", "*");
   next();
 });
+app.use((req, res, next) => {
+  res.locals.user = getUser(req);
+  next();
+});
 app.use("/api", api);
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
