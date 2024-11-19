@@ -1,0 +1,105 @@
+sugarData:
+[
+    {
+        code: "",
+        title: {
+            en: "Full Sugar",
+            zh: "全糖"
+        }
+    },
+    {
+        code: "",
+        title: {
+            en: "75% Sugar",
+            zh: "少糖"
+        }
+    },
+    {
+        code: "",
+        title: {
+            en: "Half Sugar",
+            zh: "半糖"
+        }
+    },
+    {
+        code: "",
+        title: {
+            en: "25% Sugar",
+            zh: "微糖"
+        }
+    },
+    {
+        code: "",
+        title: {
+            en: "Sugar Free",
+            zh: "無糖"
+        }
+    },
+]
+
+iceData:
+[
+    {
+        code: "",
+        title: {
+            en: "Regular Ice",
+            zh: "正常冰"
+        }
+    },
+    {
+        code: "",
+        title: {
+            en: "Less Ice",
+            zh: "少冰"
+        }
+    },
+    {
+        code: "",
+        title: {
+            en: "Little Ice",
+            zh: "微冰"
+        }
+    },
+    {
+        code: "",
+        title: {
+            en: "Ice Free",
+            zh: "去冰"
+        }
+    },
+    {
+        code: "",
+        title: {
+            en: "Hot",
+            zh: "熱"
+        }
+    },
+]
+
+sizeData:
+[
+    {
+        code: "",
+        title: {
+            en: "Tall",
+            zh: "小杯"
+        },
+        price: 0
+    },
+    {
+        code: "",
+        title: {
+            en: "Grande",
+            zh: "中杯"
+        },
+        price: 10
+    },
+    {
+        code: "",
+        title: {
+            en: "Venti",
+            zh: "大杯"
+        },
+        price: 15
+    },
+]

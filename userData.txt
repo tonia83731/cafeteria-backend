@@ -1,0 +1,62 @@
+[
+    {
+        "name": "Alice Smith",
+        "email": "alice.smith@example.com",
+        "password": "Alice@2024",
+        "confirmPassword": "Alice@2024"
+    },
+    {
+        "name": "Bob Johnson",
+        "email": "bob.johnson@example.com",
+        "password": "Bob#Secure1",
+        "confirmPassword": "Bob#Secure1"
+    },
+    {
+        "name": "Catherine Lee",
+        "email": "catherine.lee@example.com",
+        "password": "Cathy#Secure2",
+        "confirmPassword": "Cathy#Secure2"
+    },
+    {
+        "name": "Daniel Brown",
+        "email": "daniel.brown@example.com",
+        "password": "Dan#Secure3!",
+        "confirmPassword": "Dan#Secure3!"
+    },
+    {
+        "name": "Evelyn Davis",
+        "email": "evelyn.davis@example.com",
+        "password": "Ev3lyn#2024!",
+        "confirmPassword": "Ev3lyn#2024!"
+    },
+    {
+        "name": "Frank Wilson",
+        "email": "frank.wilson@example.com",
+        "password": "Frank#1234!",
+        "confirmPassword": "Frank#1234!"
+    },
+    {
+        "name": "Grace Kim",
+        "email": "grace.kim@example.com",
+        "password": "Grace@Secure4",
+        "confirmPassword": "Grace@Secure4"
+    },
+    {
+        "name": "Henry Martin",
+        "email": "henry.martin@example.com",
+        "password": "Henry#Secure5",
+        "confirmPassword": "Henry#Secure5"
+    },
+    {
+        "name": "Isabella Clark",
+        "email": "isabella.clark@example.com",
+        "password": "Isab3lla!2024",
+        "confirmPassword": "Isab3lla!2024"
+    },
+    {
+        "name": "James Lewis",
+        "email": "james.lewis@example.com",
+        "password": "James#2024@",
+        "confirmPassword": "James#2024@"
+    }
+]
