@@ -427,13 +427,35 @@ const adminController = {
       console.log(error);
     }
   },
+  getCoupon: async (req, res, next) => {
+    try {
+      const { couponId } = req.params;
+      const coupon = await Coupon.findByPk(couponId, {
+        raw: true,
+      });
+      if (!coupon)
+        return res.status(404).json({
+          success: false,
+          messge: "Coupon does not exist.",
+        });
+
+      return res.status(200).json({
+        success: true,
+        data: coupon,
+      });
+    } catch (error) {
+      console.log(error);
+      next();
+    }
+  },
+
   addCoupon: async (req, res, next) => {
     try {
       const {
-        titleZh,
-        titleEn,
-        descriptionZh,
-        descriptionEn,
+        title_zh,
+        title_en,
+        description_zh,
+        description_en,
         code,
         startDate,
         endDate,
@@ -442,19 +464,19 @@ const adminController = {
         categoryId,
       } = req.body;
 
-      if (!titleZh || !titleEn)
+      if (!title_zh || !title_en)
         return res.status(400).json({
           success: false,
           message: "Title cannot be blank",
         });
 
       const title = {
-        zh: titleZh,
-        en: titleEn,
+        zh: title_zh,
+        en: title_en,
       };
       const description = {
-        zh: descriptionZh,
-        en: descriptionEn,
+        zh: description_zh,
+        en: description_en,
       };
 
       if (code.length < 6 || code.length > 18)
@@ -542,21 +564,22 @@ const adminController = {
 
       return res.status(201).json({
         success: true,
-        message: "Add coupons to discounts, Coupon is published.",
+        message: "Coupon is published. Add coupons to discounts.",
       });
     } catch (error) {
       console.log(error);
     }
   },
   // cannot edit after published
+  // edit here
   editCoupon: async (req, res, next) => {
     try {
       const { couponId } = req.params;
       const {
-        titleZh,
-        titleEn,
-        descriptionZh,
-        descriptionEn,
+        title_zh,
+        title_en,
+        description_zh,
+        description_en,
         code,
         startDate,
         endDate,
@@ -576,19 +599,19 @@ const adminController = {
           success: false,
           message: "Coupon cannot edit after published",
         });
-      if (!titleZh || !titleEn)
+      if (!title_zh || !title_en)
         return res.status(400).json({
           success: false,
           message: "Title cannot be blank",
         });
 
       const title = {
-        zh: titleZh,
-        en: titleEn,
+        zh: title_zh,
+        en: title_en,
       };
       const description = {
-        zh: descriptionZh,
-        en: descriptionEn,
+        zh: description_zh,
+        en: description_en,
       };
 
       if (code.length < 6 || code.length > 18)
