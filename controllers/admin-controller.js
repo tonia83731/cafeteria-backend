@@ -236,6 +236,8 @@ const adminController = {
       console.log(error);
     }
   },
+
+  // edit
   updateProduct: async (req, res, next) => {
     try {
       const { productId } = req.params;
@@ -366,6 +368,7 @@ const adminController = {
       console.log(error);
     }
   },
+
   deleteProduct: async (req, res, next) => {
     try {
       const { productId } = req.params;
@@ -378,46 +381,34 @@ const adminController = {
       const categoryId = product.categoryId;
 
       await product.destroy();
-      // if (categoryId === 1) {
-      //   const [size, ice, sugar] = await Promise.all([
-      //     SizeOptions.findOne({
-      //       where: { productId },
-      //     }),
-      //     DrinkIceOptions.findOne({
-      //       where: { productId },
-      //     }),
-      //     DrinkSugarOptions.findOne({
-      //       where: { productId },
-      //     }),
-      //   ]);
-      //   if (!size)
-      //     return res.status(404).json({
-      //       success: false,
-      //       message: "Size no found",
-      //     });
-      //   if (!ice)
-      //     return res.status(404).json({
-      //       success: false,
-      //       message: "Ice no found",
-      //     });
-      //   if (!sugar)
-      //     return res.status(404).json({
-      //       success: false,
-      //       message: "Sugar no found",
-      //     });
-      //   await size.destroy();
-      //   await ice.destroy();
-      //   await sugar.destroy();
+      if (categoryId === 1) {
+        const [sizes, ices, sugars] = await Promise.all([
+          CustomSize.findAll({
+            where: { productId },
+          }),
+          CustomIce.findAll({
+            where: { productId },
+          }),
+          CustomSugar.findAll({
+            where: { productId },
+          }),
+        ]);
 
-      //   return res.status(200).json({
-      //     success: true,
-      //     message: "Drinks Product delete (including size, ice, sugar)",
-      //   });
-      // }
-      // return res.status(200).json({
-      //   success: true,
-      //   message: "Product delete",
-      // });
+        await Promise.all([
+          ...sizes.map((size) => size.destroy()),
+          ...ices.map((ice) => ice.destroy()),
+          ...sugars.map((sugar) => sugar.destroy()),
+        ]);
+
+        return res.status(200).json({
+          success: true,
+          message: "Drinks Product delete (including size, ice, sugar)",
+        });
+      }
+      return res.status(200).json({
+        success: true,
+        message: "Product delete",
+      });
     } catch (error) {
       console.log(error);
     }
