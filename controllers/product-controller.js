@@ -19,15 +19,12 @@ const productController = {
           ...product,
           categoryCode: product.Category.code,
           Category: undefined,
-          sizeOptions: product.sizeOptions.options,
-          sugarOptions: product.sugarOptions.options,
-          iceOptions: product.iceOptions.options,
         };
       });
       // console.log(productData);
       return res.status(200).json({
         success: true,
-        products: productData,
+        data: productData,
       });
     } catch (error) {
       console.log(error);
@@ -62,7 +59,7 @@ const productController = {
       };
       return res.status(200).json({
         success: true,
-        product: productData,
+        data: productData,
       });
     } catch (error) {
       console.log(error);
@@ -75,7 +72,7 @@ const productController = {
       });
       return res.status(200).json({
         success: true,
-        categories,
+        data: categories,
       });
     } catch (error) {
       console.log(error);

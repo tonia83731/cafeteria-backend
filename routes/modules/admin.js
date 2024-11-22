@@ -15,7 +15,6 @@ router.post("/coupons", adminController.addCoupon);
 router.get("/orders/:orderId", adminController.getOrder);
 router.put("/orders/:orderId", adminController.updateOrderStatus);
 router.get("/orders", adminController.getOrders);
-router.get("/langauges", adminController.getLangauges);
 router.get("/categories", adminController.getCategories);
 
 module.exports = router;

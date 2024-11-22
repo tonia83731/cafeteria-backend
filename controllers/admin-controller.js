@@ -3,7 +3,6 @@ const {
   Product,
   Coupon,
   Discount,
-  Language,
   Category,
   SizeOptions,
   DrinkSugarOptions,
@@ -14,34 +13,6 @@ const {
 const { imageFileHandler } = require("../helpers/file-helpers");
 
 const adminController = {
-  // -------------------- langauge --------------------
-  getLangauges: async (req, res, next) => {
-    try {
-      const langauges = await Language.findAll({
-        raw: true,
-      });
-
-      return res.status(200).json({
-        success: true,
-        langauges,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  },
-  // addLangauge: async (req, res, next) => {
-  //   try {
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // },
-  // deleteLangauge: async (req, res, next) => {
-  //   try {
-  //     const { langaugeId } = req.params;
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // },
   // -------------------- category --------------------
   getCategories: async (req, res, next) => {
     try {
@@ -56,20 +27,6 @@ const adminController = {
       console.log(error);
     }
   },
-  // addCategory: async (req, res, next) => {
-  //   try {
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // },
-  // deleteCategory: async (req, res, next) => {
-  //   try {
-  //     const { categoryId } = req.params;
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // },
-
   // -------------------- product --------------------
   getProducts: async (req, res, next) => {
     try {

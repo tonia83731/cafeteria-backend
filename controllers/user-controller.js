@@ -2,27 +2,18 @@ const {
   User,
   Product,
   Discount,
-  Language,
   Coupon,
   Cart,
   CartItem,
   Order,
   OrderItem,
 } = require("../models");
-const { imageFileHandler } = require("../helpers/file-helpers");
 const validator = require("validator");
 const userController = {
   getUser: async (req, res, next) => {
     try {
       const { userId } = req.params;
-      const user = await User.findByPk(userId, {
-        include: [
-          {
-            model: Language,
-            as: "Language",
-          },
-        ],
-      });
+      const user = await User.findByPk(userId);
 
       if (!user)
         return res.status(404).json({
@@ -32,29 +23,22 @@ const userController = {
 
       let userData = user.toJSON();
 
-      userData = {
-        ...userData,
-        languageCode: userData.Language ? userData.Language.code : null,
-      };
-      delete userData.Language;
       return res.status(200).json({
         success: true,
-        user: userData,
+        data: userData,
       });
     } catch (error) {
       console.log(error);
+      next();
     }
   },
   updateUser: async (req, res, next) => {
     try {
       const { userId } = req.params;
       const curr_userId = req.user.id;
-      const { name, password, note, languageId } = req.body;
-      const { file } = req;
-      const [user, filePath] = await Promise.all([
-        User.findByPk(userId),
-        imageFileHandler(file),
-      ]);
+      const { name, password, address, language } = req.body;
+      const user = await User.findByPk(userId);
+
       if (!user)
         return res.status(404).json({
           success: false,
@@ -86,21 +70,17 @@ const userController = {
         });
       }
       const hash = await bcrypt.hash(password, 10);
-      if (note.length > 300)
-        return res.status(400).json({
-          success: false,
-          message: "Note cannot exceed 300 letters",
-        });
+
       const edit_user = await User.update({
         name,
         password: hash,
-        note,
-        languageId,
-        image: filePath || user.image,
+        address,
+        language,
       });
       return res.status(200).json({ success: false, user: edit_user });
     } catch (error) {
       console.log(error);
+      next();
     }
   },
   getDiscounts: async (req, res, next) => {
@@ -218,20 +198,6 @@ const userController = {
       return res.status(200).json({
         success: true,
         order,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  },
-  getLangauges: async (req, res, next) => {
-    try {
-      const langauges = await Language.findAll({
-        raw: true,
-      });
-
-      return res.status(200).json({
-        success: true,
-        langauges,
       });
     } catch (error) {
       console.log(error);

@@ -10,6 +10,5 @@ router.get("/orders/:userId", userController.getOrders);
 router.get("/discounts/:discountId", userController.getDiscount);
 router.put("/discounts/:userId", userController.applyDiscount);
 router.get("/discounts", userController.getDiscounts);
-router.get("/langauges", userController.getLangauges);
 
 module.exports = router;
