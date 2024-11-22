@@ -1,24 +1,43 @@
-const {
-  Product,
-  Category,
-  SizeOptions,
-  DrinkSugarOptions,
-  DrinkIceOptions,
-} = require("../models");
+const { Product, Category, Size, Ice, Sugar } = require("../models");
 
 const productController = {
   getProducts: async (req, res, next) => {
     try {
       const products = await Product.findAll({
-        raw: true,
+        // raw: true,
         nest: true,
-        include: [Category],
+        include: [
+          Category,
+          { model: Size, as: "ProductSizeOptions" },
+          { model: Ice, as: "ProductIceOptions" },
+          { model: Sugar, as: "ProductSugarOptions" },
+        ],
       });
-      const productData = products.map((product) => {
+      let productData = products.map((product) => product.toJSON());
+      // console.log(productData);
+      productData = productData.map((product) => {
+        const customSizes = product.ProductSizeOptions.map(
+          ({ title, price }) => ({
+            title,
+            price,
+          })
+        );
+        const customIce = product.ProductIceOptions.map(({ title }) => ({
+          title,
+        }));
+        const customSugar = product.ProductSugarOptions.map(({ title }) => ({
+          title,
+        }));
         return {
           ...product,
           categoryCode: product.Category.code,
+          customSizes,
+          customIce,
+          customSugar,
           Category: undefined,
+          ProductSizeOptions: undefined,
+          ProductIceOptions: undefined,
+          ProductSugarOptions: undefined,
         };
       });
       // console.log(productData);
@@ -34,13 +53,13 @@ const productController = {
     try {
       const { productId } = req.params;
       const product = await Product.findByPk(productId, {
-        raw: true,
+        // raw: true,
         nest: true,
         include: [
           Category,
-          { model: SizeOptions, as: "sizeOptions" },
-          { model: DrinkSugarOptions, as: "sugarOptions" },
-          { model: DrinkIceOptions, as: "iceOptions" },
+          { model: Size, as: "ProductSizeOptions" },
+          { model: Ice, as: "ProductIceOptions" },
+          { model: Sugar, as: "ProductSugarOptions" },
         ],
       });
       if (!product)
@@ -48,14 +67,29 @@ const productController = {
           success: false,
           message: "Product does not exist",
         });
-
-      let productData = {
-        ...product,
-        categoryCode: product.Category.code,
+      let productData = product.toJSON();
+      const customSizes = productData.ProductSizeOptions.map(
+        ({ title, price }) => ({
+          title,
+          price,
+        })
+      );
+      const customIce = productData.ProductIceOptions.map(({ title }) => ({
+        title,
+      }));
+      const customSugar = productData.ProductSugarOptions.map(({ title }) => ({
+        title,
+      }));
+      productData = {
+        ...productData,
+        categoryCode: productData.Category.code,
+        customSizes,
+        customIce,
+        customSugar,
         Category: undefined,
-        sizeOptions: product.sizeOptions.options,
-        sugarOptions: product.sugarOptions.options,
-        iceOptions: product.iceOptions.options,
+        ProductSizeOptions: undefined,
+        ProductIceOptions: undefined,
+        ProductSugarOptions: undefined,
       };
       return res.status(200).json({
         success: true,

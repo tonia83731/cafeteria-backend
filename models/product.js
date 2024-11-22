@@ -20,17 +20,20 @@ module.exports = (sequelize, DataTypes) => {
     Product.belongsTo(models.Category, {
       foreignKey: "categoryId",
     });
-    Product.hasOne(models.SizeOptions, {
+    Product.belongsToMany(models.Size, {
+      through: models.CustomSize,
       foreignKey: "productId",
-      as: "sizeOptions",
+      as: "ProductSizeOptions",
     });
-    Product.hasOne(models.DrinkSugarOptions, {
+    Product.belongsToMany(models.Ice, {
+      through: models.CustomIce,
       foreignKey: "productId",
-      as: "sugarOptions",
+      as: "ProductIceOptions",
     });
-    Product.hasOne(models.DrinkIceOptions, {
+    Product.belongsToMany(models.Sugar, {
+      through: models.CustomSugar,
       foreignKey: "productId",
-      as: "iceOptions",
+      as: "ProductSugarOptions",
     });
   };
   return Product;
