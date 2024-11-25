@@ -7,12 +7,13 @@ const {
   CartItem,
   Order,
   OrderItem,
+  Wish,
 } = require("../models");
 const validator = require("validator");
 const userController = {
   getUser: async (req, res, next) => {
     try {
-      const { userId } = req.params;
+      const userId = req.user.id;
       const user = await User.findByPk(userId);
 
       if (!user)
@@ -22,6 +23,8 @@ const userController = {
         });
 
       let userData = user.toJSON();
+
+      delete userData.password;
 
       return res.status(200).json({
         success: true,
@@ -34,9 +37,8 @@ const userController = {
   },
   updateUser: async (req, res, next) => {
     try {
-      const { userId } = req.params;
-      const curr_userId = req.user.id;
-      const { name, password, address, language } = req.body;
+      const userId = req.user.id;
+      const { name, password, phone, address } = req.body;
       const user = await User.findByPk(userId);
 
       if (!user)
@@ -44,132 +46,109 @@ const userController = {
           success: false,
           message: "User does not exist",
         });
-      if (userId !== curr_userId)
-        return res.status(404).json({
-          success: false,
-          message: "Permission denied",
-        });
-      if (name.length > 50 || name.length < 3)
-        return res.status(400).json({
-          success: false,
-          message: "Name must between 3-50 letters.",
-        });
-      if (
-        validator.isStrongPassword(password, {
-          minLength: 8,
-          minLowercase: 1,
-          minUppercase: 1,
-          minNumbers: 1,
-          minSymbols: 1,
-        })
-      ) {
-        return res.status(400).json({
-          success: false,
-          message:
-            "Required strong password (above 8 letters, 1 lowercase, 1 uppercase, 1 number and 1 symbol)",
-        });
-      }
-      const hash = await bcrypt.hash(password, 10);
 
-      const edit_user = await User.update({
-        name,
-        password: hash,
-        address,
-        language,
+      const update_fields = {};
+      if (name !== undefined) {
+        if (name.length > 50 || name.length < 3) {
+          return res.status(400).json({
+            success: false,
+            message: "Name must between 3-50 letters.",
+          });
+        }
+        update_fields.name = name;
+      }
+
+      if (password !== undefined) {
+        if (
+          validator.isStrongPassword(password, {
+            minLength: 8,
+            minLowercase: 1,
+            minUppercase: 1,
+            minNumbers: 1,
+            minSymbols: 1,
+          })
+        ) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "Required strong password (above 8 letters, 1 lowercase, 1 uppercase, 1 number and 1 symbol)",
+          });
+        }
+        const hash = await bcrypt.hash(password, 10);
+        update_fields.password = hash;
+      }
+
+      if (phone !== undefined) update_fields.phone = phone;
+      if (address !== undefined) update_fields.address = address;
+
+      const edit_user = await user.update(update_fields);
+      // delete edit_user.password;
+      return res.status(200).json({
+        success: false,
+        message: "User updated successfully.",
+        data: edit_user,
       });
-      return res.status(200).json({ success: false, user: edit_user });
     } catch (error) {
       console.log(error);
       next();
     }
   },
-  getDiscounts: async (req, res, next) => {
+  // 儲存時需驗證載具 電子發票 API申請
+  // https://ithelp.ithome.com.tw/articles/10195024
+  // https://ithelp.ithome.com.tw/articles/10195281
+  // https://ithelp.ithome.com.tw/articles/10195561
+  updateInvoice: async (req, res, next) => {
     try {
-      const { userId } = req.params;
-      const discounts = await Discount.findAll({
-        where: { userId },
-        include: [Coupon],
-      });
-      return res.status(200).json({
-        success: true,
-        discounts,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  },
-  getDiscount: async (req, res, next) => {
-    try {
-      const { discountId } = req.params;
-      const discount = await Discount.findByPk(discountId, {
-        include: [Coupon],
-      });
-      return res.status(200).json({
-        success: true,
-        discount,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  },
-  applyDiscount: async (req, res, next) => {
-    try {
-      const { userId } = req.params;
-      const { code } = req.body;
-      const coupon = await Coupon.findOne({
-        where: { code },
-      });
+      const userId = req.user.id;
+      const { invoice } = req.body;
+      const user = await User.findByPk(userId);
 
-      if (!coupon)
+      if (!user)
         return res.status(404).json({
           success: false,
-          message: "Coupon not found.",
+          message: "User does not exist",
         });
 
-      const discount = await Discount.findOne({
-        where: { userId, couponId: coupon.id },
-      });
+      await user.update({ invoice });
+      return res
+        .status(200)
+        .json({ success: true, message: "User invoice updated." });
+    } catch (error) {
+      console.log(error);
+      next();
+    }
+  },
+  updateLanguagePerference: async (req, res, next) => {
+    try {
+      const userId = req.user.id;
+      const { language } = req.body;
+      const user = await User.findByPk(userId);
 
-      if (discount.isApplied)
-        return res.status(400).json({
+      if (!user)
+        return res.status(404).json({
           success: false,
-          message: "Discount has already been used.",
+          message: "User does not exist",
         });
 
-      const update_discount = await discount.update({
-        isApplied: true,
-      });
+      const validLanguages = ["zh", "en"];
+      if (!validLanguages.includes(language))
+        return res.status(404).json({
+          success: false,
+          message: "Language invalid. Supported languages are 'zh' and 'en'.",
+        });
 
-      return res.status(200).json({
-        success: true,
-        data: {
-          discount: update_discount,
-          coupon,
-        },
-      });
+      if (language === user.language)
+        return res.status(200).json({
+          success: true,
+          message: "Language is already updated.",
+        });
+      await user.update({ language });
+      return res
+        .status(200)
+        .json({ success: true, message: "Language perferences updated." });
     } catch (error) {
       console.log(error);
-    }
-  },
-  getWishList: async (req, res, next) => {
-    try {
-      const { userId } = req.params;
-    } catch (error) {
-      console.log(error);
-    }
-  },
-  addProductToWish: async (req, res, next) => {
-    try {
-      const { userId, productId } = req.params;
-    } catch (error) {
-      console.log(error);
-    }
-  },
-  removeProductFromWish: async (req, res, next) => {
-    try {
-      const { userId, productId } = req.params;
-    } catch (error) {
-      console.log(error);
+      next();
     }
   },
   getOrders: async (req, res, next) => {
@@ -203,76 +182,7 @@ const userController = {
       console.log(error);
     }
   },
-  getCart: async (req, res, next) => {
-    try {
-      const { userId } = req.params;
-      const cart = await Cart.findOne({
-        where: { userId },
-        include: [CartItem],
-      });
 
-      return res.status(200).json({
-        success: true,
-        cart,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  },
-  addCartItem: async (req, res, next) => {
-    try {
-      const { cartId } = req.params;
-      const { productId, quantity, size, ice, sugar } = req.body;
-      const product = await Product.findByPk(product, {
-        include: [Category],
-      });
-
-      const subPrice = (product.price + size.price) * quantity;
-
-      const new_cart_item = await CartItem.create({
-        cartId,
-        productId,
-        quantity,
-        size,
-        ice,
-        sugar,
-        subPrice,
-      });
-
-      return (
-        res.status(201),
-        json({
-          success: true,
-          cartItem: new_cart_item,
-        })
-      );
-    } catch (error) {
-      console.log(error);
-    }
-  },
-  updateCartItem: async (req, res, next) => {
-    try {
-      const { cartItemId } = req.params;
-      const cartItem = await CartItem.findByPk(cartItemId, {
-        include: [Product],
-      });
-      const { quantity, size, ice, sugar } = req.body;
-      if (!cartItem)
-        return res.status(404).json({
-          success: false,
-          message: "CartItem no found.",
-        });
-    } catch (error) {
-      console.log(error);
-    }
-  },
-  deleteCartItem: async (req, res, next) => {
-    try {
-      const { cartId, cartItemId } = req.params;
-    } catch (error) {
-      console.log(error);
-    }
-  },
   // note: clear cartitem after place order
 };
 module.exports = userController;

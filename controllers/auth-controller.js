@@ -1,4 +1,4 @@
-const { User, Language } = require("../models");
+const { User, Cart } = require("../models");
 const passport = require("../config/passport");
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
@@ -70,16 +70,17 @@ const authController = {
 
       user = user.toJSON();
       // create cart when user create
-      // const cart = await Cart.create({
-      //   userId: user.id,
-      // });
+      const cart = await Cart.create({
+        userId: user.id,
+      });
       delete user.password;
       // resSuccessHelpers(res, { user, cart }, 201);
       return res.status(201).json({
         success: true,
+        message: "User and user cart created.",
         data: {
-          message: "User created.",
           user,
+          cart,
         },
       });
     } catch (error) {

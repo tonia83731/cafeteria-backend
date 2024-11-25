@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
       email: DataTypes.STRING,
       password: DataTypes.STRING,
       address: DataTypes.STRING,
+      phone: DataTypes.STRING,
       isAdmin: DataTypes.BOOLEAN,
       language: DataTypes.STRING,
     },
@@ -19,6 +20,11 @@ module.exports = (sequelize, DataTypes) => {
   User.associate = function (models) {
     User.hasMany(models.Discount, {
       foreignKey: "userId",
+    });
+    User.belongsToMany(models.Product, {
+      through: models.Wish,
+      foreignKey: "userId",
+      as: "WishedProducts",
     });
     User.hasOne(models.Cart, {
       foreignKey: "userId",
