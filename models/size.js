@@ -14,10 +14,8 @@ module.exports = (sequelize, DataTypes) => {
   );
   Size.associate = function (models) {
     // associations can be defined here
-    Size.belongsToMany(models.Product, {
-      through: models.CustomSize,
+    Size.hasMany(models.CartItem, {
       foreignKey: "sizeId",
-      as: "AvailableSizesForProduct",
     });
   };
   return Size;

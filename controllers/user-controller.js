@@ -8,6 +8,7 @@ const {
   Order,
   OrderItem,
   Wish,
+  Card,
 } = require("../models");
 const validator = require("validator");
 const userController = {
@@ -93,6 +94,7 @@ const userController = {
       next();
     }
   },
+  // edit
   // 儲存時需驗證載具 電子發票 API申請
   // https://ithelp.ithome.com.tw/articles/10195024
   // https://ithelp.ithome.com.tw/articles/10195281
@@ -118,6 +120,7 @@ const userController = {
       next();
     }
   },
+
   updateLanguagePerference: async (req, res, next) => {
     try {
       const userId = req.user.id;
@@ -151,38 +154,29 @@ const userController = {
       next();
     }
   },
-  getOrders: async (req, res, next) => {
+  getCards: async (req, res, next) => {
     try {
-      const { userId } = req.params;
-      const orders = await Order.findAll({
-        where: { userId },
-      });
+      const userId = req.user.id;
+      const user = await User.findByPk(userId);
 
-      return res.status(200).json({
-        success: true,
-        orders,
-      });
+      if (!user)
+        return res.status(404).json({
+          success: false,
+          message: "User does not exist",
+        });
     } catch (error) {
       console.log(error);
+      next();
     }
   },
-  getOrder: async (req, res, next) => {
+  addCards: async (req, res, next) => {
     try {
-      const { userId, orderId } = req.params;
-      const order = await Order.findOne({
-        where: { userId, orderId },
-        include: [OrderItem],
-      });
-
-      return res.status(200).json({
-        success: true,
-        order,
-      });
+      const userId = req.user.id;
+      const { cardNumber, expirationDate } = req.body;
     } catch (error) {
       console.log(error);
+      next();
     }
   },
-
-  // note: clear cartitem after place order
 };
 module.exports = userController;

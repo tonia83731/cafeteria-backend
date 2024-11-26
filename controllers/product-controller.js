@@ -1,46 +1,21 @@
 const { Product, Category, Size, Ice, Sugar } = require("../models");
 
 const productController = {
+  // edit
   getProducts: async (req, res, next) => {
     try {
       const products = await Product.findAll({
-        // raw: true,
+        raw: true,
         nest: true,
-        include: [
-          Category,
-          { model: Size, as: "ProductSizeOptions" },
-          { model: Ice, as: "ProductIceOptions" },
-          { model: Sugar, as: "ProductSugarOptions" },
-        ],
+        include: [Category],
       });
-      let productData = products.map((product) => product.toJSON());
-      // console.log(productData);
-      productData = productData.map((product) => {
-        const customSizes = product.ProductSizeOptions.map(
-          ({ title, price }) => ({
-            title,
-            price,
-          })
-        );
-        const customIce = product.ProductIceOptions.map(({ title }) => ({
-          title,
-        }));
-        const customSugar = product.ProductSugarOptions.map(({ title }) => ({
-          title,
-        }));
+      let productData = products.map((product) => {
         return {
           ...product,
           categoryCode: product.Category.code,
-          customSizes,
-          customIce,
-          customSugar,
           Category: undefined,
-          ProductSizeOptions: undefined,
-          ProductIceOptions: undefined,
-          ProductSugarOptions: undefined,
         };
       });
-      // console.log(productData);
       return res.status(200).json({
         success: true,
         data: productData,
@@ -53,44 +28,42 @@ const productController = {
     try {
       const { productId } = req.params;
       const product = await Product.findByPk(productId, {
-        // raw: true,
+        raw: true,
         nest: true,
-        include: [
-          Category,
-          { model: Size, as: "ProductSizeOptions" },
-          { model: Ice, as: "ProductIceOptions" },
-          { model: Sugar, as: "ProductSugarOptions" },
-        ],
+        include: [Category],
       });
       if (!product)
         return res.json(404).json({
           success: false,
           message: "Product does not exist",
         });
-      let productData = product.toJSON();
-      const customSizes = productData.ProductSizeOptions.map(
-        ({ title, price }) => ({
-          title,
-          price,
-        })
-      );
-      const customIce = productData.ProductIceOptions.map(({ title }) => ({
-        title,
-      }));
-      const customSugar = productData.ProductSugarOptions.map(({ title }) => ({
-        title,
-      }));
-      productData = {
-        ...productData,
-        categoryCode: productData.Category.code,
-        customSizes,
-        customIce,
-        customSugar,
+
+      let categoryId = product.categoryId;
+      let productData = {
+        ...product,
+        categoryCode: product.Category.code,
         Category: undefined,
-        ProductSizeOptions: undefined,
-        ProductIceOptions: undefined,
-        ProductSugarOptions: undefined,
       };
+
+      const [sizeOptions, iceOptions, sugarOptions] = await Promise.all([
+        Size.findAll({
+          raw: true,
+        }),
+        Ice.findAll({
+          raw: true,
+        }),
+        Sugar.findAll({
+          raw: true,
+        }),
+      ]);
+
+      if (categoryId === 3 || categoryId === 4) {
+        productData.sizeOptions = sizeOptions;
+        productData.iceOptions = iceOptions;
+        productData.sugarOptions = sugarOptions;
+      } else if (categoryId === 5) {
+        productData.sizeOptions = sizeOptions;
+      }
       return res.status(200).json({
         success: true,
         data: productData,

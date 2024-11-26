@@ -9,9 +9,6 @@ const {
   Sugar,
   Order,
   OrderItem,
-  CustomSize,
-  CustomIce,
-  CustomSugar,
 } = require("../models");
 const { imageFileHandler } = require("../helpers/file-helpers");
 
@@ -30,47 +27,21 @@ const adminController = {
       console.log(error);
     }
   },
-  // -------------------- product --------------------
+  // -------------------- product (edit) --------------------
   getProducts: async (req, res, next) => {
     try {
       const products = await Product.findAll({
-        // raw: true,
+        raw: true,
         nest: true,
-        include: [
-          Category,
-          { model: Size, as: "ProductSizeOptions" },
-          { model: Ice, as: "ProductIceOptions" },
-          { model: Sugar, as: "ProductSugarOptions" },
-        ],
+        include: [Category],
       });
-      let productData = products.map((product) => product.toJSON());
-      // console.log(productData);
-      productData = productData.map((product) => {
-        const customSizes = product.ProductSizeOptions.map(
-          ({ title, price }) => ({
-            title,
-            price,
-          })
-        );
-        const customIce = product.ProductIceOptions.map(({ title }) => ({
-          title,
-        }));
-        const customSugar = product.ProductSugarOptions.map(({ title }) => ({
-          title,
-        }));
+      let productData = products.map((product) => {
         return {
           ...product,
           categoryCode: product.Category.code,
-          customSizes,
-          customIce,
-          customSugar,
           Category: undefined,
-          ProductSizeOptions: undefined,
-          ProductIceOptions: undefined,
-          ProductSugarOptions: undefined,
         };
       });
-      // console.log(productData);
       return res.status(200).json({
         success: true,
         data: productData,
@@ -83,44 +54,42 @@ const adminController = {
     try {
       const { productId } = req.params;
       const product = await Product.findByPk(productId, {
-        // raw: true,
+        raw: true,
         nest: true,
-        include: [
-          Category,
-          { model: Size, as: "ProductSizeOptions" },
-          { model: Ice, as: "ProductIceOptions" },
-          { model: Sugar, as: "ProductSugarOptions" },
-        ],
+        include: [Category],
       });
       if (!product)
         return res.json(404).json({
           success: false,
           message: "Product does not exist",
         });
-      let productData = product.toJSON();
-      const customSizes = productData.ProductSizeOptions.map(
-        ({ title, price }) => ({
-          title,
-          price,
-        })
-      );
-      const customIce = productData.ProductIceOptions.map(({ title }) => ({
-        title,
-      }));
-      const customSugar = productData.ProductSugarOptions.map(({ title }) => ({
-        title,
-      }));
-      productData = {
-        ...productData,
-        categoryCode: productData.Category.code,
-        customSizes,
-        customIce,
-        customSugar,
+
+      let categoryId = product.categoryId;
+      let productData = {
+        ...product,
+        categoryCode: product.Category.code,
         Category: undefined,
-        ProductSizeOptions: undefined,
-        ProductIceOptions: undefined,
-        ProductSugarOptions: undefined,
       };
+
+      const [sizeOptions, iceOptions, sugarOptions] = await Promise.all([
+        Size.findAll({
+          raw: true,
+        }),
+        Ice.findAll({
+          raw: true,
+        }),
+        Sugar.findAll({
+          raw: true,
+        }),
+      ]);
+
+      if (categoryId === 3 || categoryId === 4) {
+        productData.sizeOptions = sizeOptions;
+        productData.iceOptions = iceOptions;
+        productData.sugarOptions = sugarOptions;
+      } else if (categoryId === 5) {
+        productData.sizeOptions = sizeOptions;
+      }
       return res.status(200).json({
         success: true,
         data: productData,
@@ -138,9 +107,6 @@ const adminController = {
         description_en,
         price,
         categoryId,
-        sizeOptions,
-        sugarOptions,
-        iceOptions,
       } = req.body;
       const { file } = req;
 
@@ -181,52 +147,6 @@ const adminController = {
         // image: filePath || null,
       });
 
-      if (categoryId === 1) {
-        if (sizeOptions.length === 0)
-          return res.status(400).json({
-            success: false,
-            message: "SizeOptions cannot be blank for drinks",
-          });
-        if (iceOptions.length === 0)
-          return res.status(400).json({
-            success: false,
-            message: "IceOptions cannot be blank for drinks",
-          });
-        if (sugarOptions.length === 0)
-          return res.status(400).json({
-            success: false,
-            message: "SugarOptions cannot be blank for drinks",
-          });
-        const productId = new_product.id;
-        for (let i = 0; i < sizeOptions.length; i++) {
-          let sizeId = sizeOptions[i];
-          await CustomSize.create({
-            productId,
-            sizeId,
-          });
-        }
-        for (let i = 0; i < iceOptions.length; i++) {
-          let iceId = iceOptions[i];
-          await CustomIce.create({
-            productId,
-            iceId,
-          });
-        }
-        for (let i = 0; i < sugarOptions.length; i++) {
-          let sugarId = sugarOptions[i];
-          await CustomSugar.create({
-            productId,
-            sugarId,
-          });
-        }
-        return res.status(201).json({
-          success: true,
-          message: "Product created",
-          data: {
-            product: new_product,
-          },
-        });
-      }
       return res.status(201).json({
         success: true,
         message: "Product created",
@@ -237,7 +157,6 @@ const adminController = {
     }
   },
 
-  // edit
   updateProduct: async (req, res, next) => {
     try {
       const { productId } = req.params;
@@ -248,9 +167,6 @@ const adminController = {
         description_en,
         price,
         categoryId,
-        sizeOptions,
-        sugarOptions,
-        iceOptions,
       } = req.body;
       // const { file } = req;
 
@@ -288,82 +204,19 @@ const adminController = {
           message: "Price cannot be blank",
         });
 
-      // const update_product = await product.update({
-      //   title,
-      //   description,
-      //   price,
-      //   categoryId,
-      //   // image: filePath || product.image,
-      // });
+      const update_product = await product.update({
+        title,
+        description,
+        price,
+        categoryId,
+        // image: filePath || product.image,
+      });
 
-      // if (product.categoryId === 1) {
-      //   const [size, ice, sugar] = await Promise.all([
-      //     CustomSize.findOne({
-      //       where: { productId },
-      //     }),
-      //     CustomIce.findOne({
-      //       where: { productId },
-      //     }),
-      //     CustomSugar.findOne({
-      //       where: { productId },
-      //     }),
-      //   ]);
-      //   if (!size)
-      //     return res.status(404).json({
-      //       success: false,
-      //       message: "Size no found",
-      //     });
-      //   if (!ice)
-      //     return res.status(404).json({
-      //       success: false,
-      //       message: "Ice no found",
-      //     });
-      //   if (!sugar)
-      //     return res.status(404).json({
-      //       success: false,
-      //       message: "Sugar no found",
-      //     });
-      //   if (sizeOptions.length === 0)
-      //     return res.status(400).json({
-      //       success: false,
-      //       message: "SizeOptions cannot be blank for drinks",
-      //     });
-      //   if (iceOptions.length === 0)
-      //     return res.status(400).json({
-      //       success: false,
-      //       message: "IceOptions cannot be blank for drinks",
-      //     });
-      //   if (sugarOptions.length === 0)
-      //     return res.status(400).json({
-      //       success: false,
-      //       message: "SugarOptions cannot be blank for drinks",
-      //     });
-
-      //   const update_size = await size.update({
-      //     options: sizeOptions,
-      //   });
-      //   const update_ice = await ice.update({
-      //     options: iceOptions,
-      //   });
-      //   const update_sugar = await sugar.update({
-      //     options: sugarOptions,
-      //   });
-      //   return res.status(201).json({
-      //     success: true,
-      //     message: "Product updated",
-      //     data: {
-      //       product: update_product,
-      //       size: update_size,
-      //       ice: update_ice,
-      //       sugar: update_sugar,
-      //     },
-      //   });
-      // }
-      // return res.status(201).json({
-      //   success: true,
-      //   message: "Product updated",
-      //   product: update_product,
-      // });
+      return res.status(201).json({
+        success: true,
+        message: "Product updated",
+        product: update_product,
+      });
     } catch (error) {
       console.log(error);
     }
@@ -378,33 +231,9 @@ const adminController = {
           success: false,
           message: "Product no found.",
         });
-      const categoryId = product.categoryId;
 
       await product.destroy();
-      if (categoryId === 1) {
-        const [sizes, ices, sugars] = await Promise.all([
-          CustomSize.findAll({
-            where: { productId },
-          }),
-          CustomIce.findAll({
-            where: { productId },
-          }),
-          CustomSugar.findAll({
-            where: { productId },
-          }),
-        ]);
 
-        await Promise.all([
-          ...sizes.map((size) => size.destroy()),
-          ...ices.map((ice) => ice.destroy()),
-          ...sugars.map((sugar) => sugar.destroy()),
-        ]);
-
-        return res.status(200).json({
-          success: true,
-          message: "Drinks Product delete (including size, ice, sugar)",
-        });
-      }
       return res.status(200).json({
         success: true,
         message: "Product delete",

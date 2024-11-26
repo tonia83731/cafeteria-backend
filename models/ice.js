@@ -12,11 +12,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   Ice.associate = function (models) {
-    // associations can be defined here
-    Ice.belongsToMany(models.Product, {
-      through: models.CustomIce,
+    Ice.hasMany(models.CartItem, {
       foreignKey: "iceId",
-      as: "AvailableIceForProduct",
     });
   };
   return Ice;

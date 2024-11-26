@@ -6,10 +6,10 @@ module.exports = (sequelize, DataTypes) => {
       cartId: DataTypes.INTEGER,
       productId: DataTypes.INTEGER,
       quantity: DataTypes.INTEGER,
-      size: DataTypes.JSON,
-      ice: DataTypes.JSON,
-      sugar: DataTypes.JSON,
-      subPrice: DataTypes.INTEGER,
+      sizeId: DataTypes.INTEGER,
+      iceId: DataTypes.INTEGER,
+      sugarId: DataTypes.INTEGER,
+      total: DataTypes.INTEGER,
     },
     {
       modelName: "CartItem",
@@ -18,9 +18,24 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   CartItem.associate = function (models) {
-    // associations can be defined here
-    CartItem.hasMany(models.Cart, {
+    // A cart item belongs to one cart
+    CartItem.belongsTo(models.Cart, {
       foreignKey: "cartId",
+    });
+
+    // A cart item belongs to one product
+    CartItem.belongsTo(models.Product, {
+      foreignKey: "productId",
+    });
+
+    CartItem.belongsTo(models.Size, {
+      foreignKey: "sizeId",
+    });
+    CartItem.belongsTo(models.Ice, {
+      foreignKey: "iceId",
+    });
+    CartItem.belongsTo(models.Sugar, {
+      foreignKey: "sugarId",
     });
   };
   return CartItem;

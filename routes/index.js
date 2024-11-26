@@ -12,6 +12,7 @@ const comment = require("./modules/comment");
 const user = require("./modules/user");
 const wish = require("./modules/wish");
 const discount = require("./modules/discount");
+const cart = require("./modules/cart");
 const product = require("./modules/product");
 const productController = require("../controllers/product-controller");
 
@@ -22,6 +23,7 @@ router.get("/categories", productController.getCategories);
 router.use("/users", authenticated, authenticatedUser, user);
 router.use("/wishes", authenticated, authenticatedUser, wish);
 router.use("/discounts", authenticated, authenticatedUser, discount);
+router.use("/carts", authenticated, authenticatedUser, cart);
 router.use("/admin", authenticated, authenticatedAdmin, admin);
 router.use("/", errorHandler);
 

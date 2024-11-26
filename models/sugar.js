@@ -12,10 +12,8 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   Sugar.associate = function (models) {
-    Sugar.belongsToMany(models.Product, {
-      through: models.CustomSugar,
+    Sugar.hasMany(models.CartItem, {
       foreignKey: "sugarId",
-      as: "AvailableSigarForProduct",
     });
   };
   return Sugar;
