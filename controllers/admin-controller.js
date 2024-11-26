@@ -10,7 +10,7 @@ const {
   Order,
   OrderItem,
 } = require("../models");
-const { imageFileHandler } = require("../helpers/file-helpers");
+const { imageFileHanlder } = require("../helpers/file-helpers");
 
 const adminController = {
   // -------------------- category --------------------
@@ -110,7 +110,7 @@ const adminController = {
       } = req.body;
       const { file } = req;
 
-      // const filePath = await imageFileHandler(file);
+      const filePath = await imageFileHanlder(file);
 
       if (!title_zh || !title_en)
         return res.status(400).json({
@@ -144,7 +144,7 @@ const adminController = {
         description,
         price,
         categoryId,
-        // image: filePath || null,
+        image: filePath || null,
       });
 
       return res.status(201).json({
@@ -156,7 +156,6 @@ const adminController = {
       console.log(error);
     }
   },
-
   updateProduct: async (req, res, next) => {
     try {
       const { productId } = req.params;
@@ -168,7 +167,7 @@ const adminController = {
         price,
         categoryId,
       } = req.body;
-      // const { file } = req;
+      const { file } = req;
 
       const product = await Product.findByPk(productId);
       if (!product)
@@ -177,39 +176,22 @@ const adminController = {
           message: "Product no found.",
         });
 
-      // const filePath = await imageFileHandler(file);
-      if (!title_zh || !title_en)
-        return res.status(400).json({
-          success: false,
-          message: "Title cannot be blank",
-        });
-
-      if (description_zh.length > 150 || description_en.length > 150)
-        return es.status(400).json({
-          success: false,
-          message: "Description cannot exceed 150 letters",
-        });
-
+      const filePath = file ? await imageFileHanlder(file) : product.image;
       const title = {
-        zh: title_zh,
-        en: title_en,
+        zh: title_zh || product.title.zh,
+        en: title_en || product.title.en,
       };
       const description = {
-        zh: description_zh,
-        en: description_en,
+        zh: description_zh || product.description.zh,
+        en: description_en || product.description.en,
       };
-      if (!price)
-        return res.status(400).json({
-          success: false,
-          message: "Price cannot be blank",
-        });
 
       const update_product = await product.update({
         title,
         description,
-        price,
-        categoryId,
-        // image: filePath || product.image,
+        price: price || product.price,
+        categoryId: categoryId || product.categoryId,
+        image: filePath,
       });
 
       return res.status(201).json({
@@ -221,7 +203,6 @@ const adminController = {
       console.log(error);
     }
   },
-
   deleteProduct: async (req, res, next) => {
     try {
       const { productId } = req.params;

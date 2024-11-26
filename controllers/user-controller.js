@@ -154,6 +154,8 @@ const userController = {
       next();
     }
   },
+
+  // edit here
   getCards: async (req, res, next) => {
     try {
       const userId = req.user.id;
