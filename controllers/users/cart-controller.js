@@ -14,6 +14,7 @@ const cartController = {
     try {
       const userId = req.user.id;
       const cart = await Cart.findOne({
+        nest: true,
         where: { userId },
         include: [
           {
@@ -23,9 +24,16 @@ const cartController = {
         ],
       });
 
+      const total = cart.CartItems.reduce((acc, curr) => acc + curr.total, 0);
+
+      const cart_data = {
+        ...cart.toJSON(),
+        total,
+      };
+
       return res.status(200).json({
         success: true,
-        cart,
+        data: cart_data,
       });
     } catch (error) {
       console.log(error);

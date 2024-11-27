@@ -21,6 +21,9 @@ module.exports = (sequelize, DataTypes) => {
     User.hasMany(models.Discount, {
       foreignKey: "userId",
     });
+    User.hasMany(models.Card, {
+      foreignKey: "userId",
+    });
     User.belongsToMany(models.Product, {
       through: models.Wish,
       foreignKey: "userId",

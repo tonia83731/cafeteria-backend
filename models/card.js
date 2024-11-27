@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
       userId: DataTypes.INTEGER,
       cardNumber: DataTypes.STRING,
       cardType: DataTypes.INTEGER,
-      expireationDate: DataTypes.DATE,
+      expirationDate: DataTypes.DATE,
     },
     {
       modelName: "Card",
@@ -15,7 +15,9 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   Card.associate = function (models) {
-    // associations can be defined here
+    Card.belongsTo(models.User, {
+      foreignKey: "userId",
+    });
   };
   return Card;
 };

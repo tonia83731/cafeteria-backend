@@ -1,16 +1,12 @@
+const { User, Card } = require("../models");
 const {
-  User,
-  Product,
-  Discount,
-  Coupon,
-  Cart,
-  CartItem,
-  Order,
-  OrderItem,
-  Wish,
-  Card,
-} = require("../models");
+  creditCartType,
+  ecryptCardNumber,
+  decryptCardNumber,
+  hideCardNumber,
+} = require("../helpers/card-helpers");
 const validator = require("validator");
+
 const userController = {
   getUser: async (req, res, next) => {
     try {
@@ -94,11 +90,6 @@ const userController = {
       next();
     }
   },
-  // edit
-  // 儲存時需驗證載具 電子發票 API申請
-  // https://ithelp.ithome.com.tw/articles/10195024
-  // https://ithelp.ithome.com.tw/articles/10195281
-  // https://ithelp.ithome.com.tw/articles/10195561
   updateInvoice: async (req, res, next) => {
     try {
       const userId = req.user.id;
@@ -120,7 +111,6 @@ const userController = {
       next();
     }
   },
-
   updateLanguagePerference: async (req, res, next) => {
     try {
       const userId = req.user.id;
@@ -154,27 +144,82 @@ const userController = {
       next();
     }
   },
-
-  // edit here
   getCards: async (req, res, next) => {
     try {
       const userId = req.user.id;
-      const user = await User.findByPk(userId);
+      const cards = await Card.findAll({
+        raw: true,
+        where: { userId },
+      });
 
-      if (!user)
-        return res.status(404).json({
-          success: false,
-          message: "User does not exist",
-        });
+      const cardDatas = cards.map((card) => {
+        const decryptCard = decryptCardNumber(card.cardNumber);
+        const partCard = hideCardNumber(decryptCard);
+        return {
+          ...card,
+          cardNumber: partCard,
+        };
+      });
+
+      return res.status(200).json({
+        success: true,
+        data: cardDatas,
+      });
     } catch (error) {
       console.log(error);
       next();
     }
   },
-  addCards: async (req, res, next) => {
+  getCard: async (req, res, next) => {
+    try {
+      const userId = req.user.id;
+      const { cardId } = req.params;
+
+      const card = await Card.findOne({
+        raw: true,
+        where: {
+          id: cardId,
+          userId,
+        },
+      });
+
+      if (!card)
+        return res.status(404).json({
+          success: false,
+          message: "Card no found",
+        });
+
+      const decryptCard = decryptCardNumber(card.cardNumber);
+
+      card.cardNumber = decryptCard;
+
+      return res.status(200).json({
+        success: true,
+        data: card,
+      });
+    } catch (error) {
+      console.log(error);
+      next();
+    }
+  },
+  addCard: async (req, res, next) => {
     try {
       const userId = req.user.id;
       const { cardNumber, expirationDate } = req.body;
+      const cardType = creditCartType(cardNumber);
+      const ecryptCard = ecryptCardNumber(cardNumber);
+      const new_card = await Card.create({
+        userId,
+        cardNumber: ecryptCard,
+        cardType,
+        expirationDate,
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: "Credit card added.",
+        data: new_card,
+      });
     } catch (error) {
       console.log(error);
       next();
