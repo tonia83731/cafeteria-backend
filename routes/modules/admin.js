@@ -17,7 +17,7 @@ router.put("/coupons/:couponId", adminCouponController.editCoupon);
 router.delete("/coupons/:couponId", adminCouponController.deleteCoupon);
 router.get("/coupons", adminCouponController.getCoupons);
 router.post("/coupons", adminCouponController.addCoupon);
-router.get("/orders/:orderId", adminOrderController.getOrder);
+// router.get("/orders/:orderId", adminOrderController.getOrder);
 router.put("/orders/:orderId", adminOrderController.updateOrderStatus);
 router.get("/orders", adminOrderController.getOrders);
 router.get("/categories", adminProductController.getCategories);

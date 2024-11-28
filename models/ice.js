@@ -15,6 +15,9 @@ module.exports = (sequelize, DataTypes) => {
     Ice.hasMany(models.CartItem, {
       foreignKey: "iceId",
     });
+    Ice.hasMany(models.OrderItem, {
+      foreignKey: "iceId",
+    });
   };
   return Ice;
 };

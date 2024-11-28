@@ -15,6 +15,9 @@ module.exports = (sequelize, DataTypes) => {
     Sugar.hasMany(models.CartItem, {
       foreignKey: "sugarId",
     });
+    Sugar.hasMany(models.OrderItem, {
+      foreignKey: "sugarId",
+    });
   };
   return Sugar;
 };

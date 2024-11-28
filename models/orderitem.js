@@ -6,10 +6,10 @@ module.exports = (sequelize, DataTypes) => {
       orderId: DataTypes.INTEGER,
       productId: DataTypes.INTEGER,
       quantity: DataTypes.INTEGER,
-      size: DataTypes.JSON,
-      ice: DataTypes.JSON,
-      sugar: DataTypes.JSON,
-      subPrice: DataTypes.INTEGER,
+      sizeId: DataTypes.INTEGER,
+      iceId: DataTypes.INTEGER,
+      sugarId: DataTypes.INTEGER,
+      price: DataTypes.INTEGER,
     },
     {
       modelName: "OrderItem",
@@ -18,9 +18,20 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   OrderItem.associate = function (models) {
-    // associations can be defined here
-    OrderItem.hasMany(models.Order, {
+    OrderItem.belongsTo(models.Order, {
       foreignKey: "orderId",
+    });
+    OrderItem.belongsTo(models.Size, {
+      foreignKey: "sizeId",
+    });
+    OrderItem.belongsTo(models.Sugar, {
+      foreignKey: "sugarId",
+    });
+    OrderItem.belongsTo(models.Ice, {
+      foreignKey: "iceId",
+    });
+    OrderItem.belongsTo(models.Product, {
+      foreignKey: "productId",
     });
   };
   return OrderItem;

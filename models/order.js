@@ -7,8 +7,8 @@ module.exports = (sequelize, DataTypes) => {
       recipientName: DataTypes.STRING,
       recipientPhone: DataTypes.STRING,
       recipientAddress: DataTypes.STRING,
-      shipping: DataTypes.JSON,
-      payment: DataTypes.JSON,
+      shippingId: DataTypes.INTEGER,
+      paymentId: DataTypes.INTEGER,
       discountId: DataTypes.INTEGER,
       totalPrice: DataTypes.INTEGER,
       status: DataTypes.STRING,
@@ -20,9 +20,25 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   Order.associate = function (models) {
-    // associations can be defined here
     Order.hasMany(models.OrderItem, {
       foreignKey: "orderId",
+    });
+    Order.belongsTo(models.Payment, {
+      foreignKey: "paymentId", // Links `Orders.paymentId` to `Payments.id`
+    });
+
+    // An Order belongs to Shipping
+    Order.belongsTo(models.Shipping, {
+      foreignKey: "shippingId",
+    });
+    Order.belongsToMany(models.Product, {
+      through: models.OrderItem,
+      foreignKey: "orderId",
+      otherKey: "productId",
+      as: "Products",
+    });
+    Order.belongsTo(models.Discount, {
+      foreignKey: "discountId",
     });
   };
   return Order;
