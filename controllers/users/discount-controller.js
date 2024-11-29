@@ -64,14 +64,14 @@ const discountController = {
           message: "Discount has already been used.",
         });
 
-      const update_discount = await discount.update({
-        isApplied: true,
-      });
+      // const update_discount = await discount.update({
+      //   isApplied: true,
+      // });
 
       return res.status(200).json({
         success: true,
         data: {
-          discount: update_discount,
+          // discount: update_discount,
           coupon,
         },
       });
