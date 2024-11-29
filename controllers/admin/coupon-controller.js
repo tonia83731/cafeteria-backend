@@ -192,15 +192,6 @@ const adminCouponController = {
           message: "Title cannot be blank",
         });
 
-      const title = {
-        zh: title_zh,
-        en: title_en,
-      };
-      const description = {
-        zh: description_zh,
-        en: description_en,
-      };
-
       if (code.length < 6 || code.length > 18)
         return res.status(400).json({
           success: false,
@@ -224,12 +215,26 @@ const adminCouponController = {
 
       let start_date = new Date(startDate);
       let end_date = new Date(endDate);
+      if (isNaN(start_date) || isNaN(end_date))
+        return res.status(400).json({
+          success: false,
+          message: "Invalid startDate or endDate.",
+        });
+
       if (start_date > end_date)
         return res.status(400).json({
           success: false,
-          message: "StartDate cannot exceed endDate",
+          message: "Start date cannot be later than end date.",
         });
 
+      const title = {
+        zh: title_zh,
+        en: title_en,
+      };
+      const description = {
+        zh: description_zh,
+        en: description_en,
+      };
       const update_coupon = await coupon.update({
         title,
         description,
@@ -240,10 +245,10 @@ const adminCouponController = {
         discountValue,
         categoryId,
       });
-      return res.status(201).json({
+      return res.status(200).json({
         success: true,
-        message: "Coupon updated",
-        coupon: update_coupon,
+        message: "Coupon updated successfully.",
+        data: update_coupon,
       });
     } catch (error) {
       console.log(error);
