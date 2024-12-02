@@ -7,12 +7,12 @@ const jwt = require("jsonwebtoken");
 const authController = {
   register: async (req, res, next) => {
     try {
-      const { name, email, password, confirmPassword } = req.body;
+      const { name, email, password, phone } = req.body;
 
-      if (!name || !email || !password || !confirmPassword)
+      if (!name || !email || !password || !phone)
         return res.status(400).json({
           success: false,
-          message: "Name, email, password, confirmPassword are required.",
+          message: "Name, email, password, phone are required.",
         });
 
       if (name.length > 50 || name.length < 3)
@@ -37,11 +37,11 @@ const authController = {
           message: "User already existed.",
         });
 
-      if (!validator.equals(password, confirmPassword))
-        return res.status(400).json({
-          success: false,
-          message: "Password and confirmPassword are not the same.",
-        });
+      // if (!validator.equals(password, confirmPassword))
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: "Password and confirmPassword are not the same.",
+      //   });
 
       // { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1, returnScore: false, pointsPerUnique: 1, pointsPerRepeat: 0.5, pointsForContainingLower: 10, pointsForContainingUpper: 10, pointsForContainingNumber: 10, pointsForContainingSymbol: 10 }
       if (
