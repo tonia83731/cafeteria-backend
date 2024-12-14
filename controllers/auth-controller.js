@@ -5,14 +5,15 @@ const validator = require("validator");
 const jwt = require("jsonwebtoken");
 
 const authController = {
+  // edit here
   register: async (req, res, next) => {
     try {
-      const { name, email, password, phone } = req.body;
+      const { name, email, password, account } = req.body;
 
-      if (!name || !email || !password || !phone)
+      if (!name || !email || !password || !account)
         return res.status(400).json({
           success: false,
-          message: "Name, email, password, phone are required.",
+          message: "Name, email, password, account are required.",
         });
 
       if (name.length > 50 || name.length < 3)
@@ -65,6 +66,7 @@ const authController = {
       let user = await User.create({
         name,
         email,
+        account,
         password: hash,
       });
 
@@ -121,6 +123,7 @@ const authController = {
       const payload = {
         id: user.id,
         email: user.email,
+        account: user.account,
         isAdmin: user.isAdmin,
       };
 

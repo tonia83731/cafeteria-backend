@@ -5,12 +5,41 @@ const discountController = {
     try {
       const userId = req.user.id;
       const discounts = await Discount.findAll({
-        where: { userId },
+        where: { userId, isApplied: false },
         include: [Coupon],
       });
+
+      // Transform the data
+      const discounts_data = discounts.map((discount) => {
+        const discountData = discount.toJSON(); // Convert the Sequelize instance to a plain object
+        const {
+          code,
+          title,
+          description,
+          discountType,
+          discountValue,
+          startDate,
+          endDate,
+          isPublished,
+        } = discountData.Coupon || {}; // Handle potential null Coupon association
+
+        return {
+          ...discountData,
+          code,
+          title,
+          description,
+          discountType,
+          discountValue,
+          startDate,
+          endDate,
+          isPublished,
+          Coupon: undefined,
+        };
+      });
+
       return res.status(200).json({
         success: true,
-        data: discounts,
+        data: discounts_data,
       });
     } catch (error) {
       console.log(error);
@@ -40,7 +69,7 @@ const discountController = {
       console.log(error);
     }
   },
-  applyDiscount: async (req, res, next) => {
+  checkedDiscount: async (req, res, next) => {
     try {
       const userId = req.user.id;
       const { code } = req.body;
@@ -58,22 +87,18 @@ const discountController = {
         where: { userId, couponId: coupon.id },
       });
 
-      if (discount.isApplied)
-        return res.status(400).json({
-          success: false,
+      if (discount.isApplied) {
+        return res.status(200).json({
+          success: true,
+          available: false,
           message: "Discount has already been used.",
         });
-
-      // const update_discount = await discount.update({
-      //   isApplied: true,
-      // });
+      }
 
       return res.status(200).json({
         success: true,
-        data: {
-          // discount: update_discount,
-          coupon,
-        },
+        available: true,
+        data: discount,
       });
     } catch (error) {
       console.log(error);

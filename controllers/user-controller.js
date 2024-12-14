@@ -81,7 +81,7 @@ const userController = {
       const edit_user = await user.update(update_fields);
       // delete edit_user.password;
       return res.status(200).json({
-        success: false,
+        success: true,
         message: "User updated successfully.",
         data: edit_user,
       });

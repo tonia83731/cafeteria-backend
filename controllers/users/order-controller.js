@@ -24,13 +24,52 @@ const orderController = {
         // raw: true,
         nest: true,
         where: { userId },
-        include: [Discount, Payment, Shipping],
+        include: [
+          {
+            model: Discount,
+            include: [Coupon],
+          },
+          Payment,
+          Shipping,
+          OrderItem,
+        ],
       });
 
-      // const orderDatas = orders.toJSON();
-      return res.status(200).json({
+      const order_datas = orders.map((order) => {
+        const orderData = order.toJSON();
+        const itemCount = orderData.OrderItems.reduce(
+          (acc, curr) => acc + curr.quantity,
+          0
+        );
+
+        return {
+          ...orderData,
+          payment: orderData.Payment ? orderData.Payment.title : null,
+          shipping: orderData.Shipping
+            ? {
+                title: orderData.Shipping.title,
+                price: orderData.Shipping.price,
+              }
+            : null,
+          discount:
+            orderData.Discount && orderData.Discount.Coupon
+              ? {
+                  code: orderData.Discount.Coupon.code,
+                  discountType: orderData.Discount.Coupon.discountType,
+                  discountValue: orderData.Discount.Coupon.discountValue,
+                }
+              : null,
+          itemCount,
+          Payment: undefined,
+          Shipping: undefined,
+          Discount: undefined,
+          OrderItems: undefined,
+        };
+      });
+
+      res.status(200).json({
         success: true,
-        data: orders,
+        data: order_datas,
       });
     } catch (error) {
       console.log(error);
@@ -49,7 +88,31 @@ const orderController = {
           },
         ],
       });
-      const orderData = order.toJSON();
+      const order_json = order.toJSON();
+      const orderData = {
+        ...order_json,
+        orderItems: order_json.OrderItems.map((order) => {
+          return {
+            ...order,
+            size: order.Size ? order.Size.title : null,
+            ice: order.Ice ? order.Ice.title : null,
+            sugar: order.Sugar ? order.Sugar.title : null,
+            product: order.Product ? order.Product.title : null,
+            Size: undefined,
+            Ice: undefined,
+            Sugar: undefined,
+            Product: undefined,
+            Discount: undefined,
+            // productId: undefined,
+            // sizeId: undefined,
+            // iceId: undefined,
+            // sugarId: undefined,
+            // createdAt: undefined,
+            // updatedAt: undefined,
+          };
+        }),
+        OrderItems: undefined,
+      };
       return res.status(200).json({
         success: true,
         data: orderData,
@@ -144,6 +207,62 @@ const orderController = {
           order,
           orderItems: new_order_items,
         },
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  cancelOrder: async (req, res, next) => {
+    try {
+      const { orderId } = req.params;
+      const order = await Order.findByPk(orderId);
+
+      if (order.status !== "pending") {
+        return res.status(400).json({
+          success: false,
+          message: "Unabled to canceld order",
+        });
+      }
+      order.status = "canceled";
+
+      await order.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Order canceled!",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+  // shipping
+
+  getShippings: async (req, res, next) => {
+    try {
+      const shippings = await Shipping.findAll({
+        raw: true,
+      });
+
+      return res.status(200).json({
+        success: true,
+        data: shippings,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
+  // payment
+  getPayments: async (req, res, next) => {
+    try {
+      const payments = await Payment.findAll({
+        raw: true,
+      });
+
+      return res.status(200).json({
+        success: true,
+        data: payments,
       });
     } catch (error) {
       console.log(error);

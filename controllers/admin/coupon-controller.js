@@ -1,5 +1,5 @@
 const { User, Coupon, Discount } = require("../../models");
-
+const { Op } = require("sequelize");
 const adminCouponController = {
   // -------------------- coupon --------------------
   getCoupons: async (req, res, next) => {
@@ -9,7 +9,7 @@ const adminCouponController = {
       });
       return res.status(200).json({
         success: true,
-        coupons,
+        data: coupons,
       });
     } catch (error) {
       console.log(error);
@@ -49,6 +49,7 @@ const adminCouponController = {
         discountType,
         discountValue,
         categoryId,
+        minSpend,
       } = req.body;
 
       if (!title_zh || !title_en)
@@ -103,13 +104,14 @@ const adminCouponController = {
         endDate,
         discountType,
         discountValue,
-        categoryId,
+        categoryId: categoryId ? categoryId : null,
+        minSpend: minSpend ? minSpend : 0,
       });
 
       return res.status(201).json({
         success: true,
         message: "Coupon created",
-        coupon: new_coupon,
+        data: new_coupon,
       });
     } catch (error) {
       console.log(error);
@@ -173,6 +175,7 @@ const adminCouponController = {
         discountType,
         discountValue,
         categoryId,
+        minSpend,
       } = req.body;
       const coupon = await Coupon.findByPk(couponId);
       if (!coupon)
@@ -243,7 +246,8 @@ const adminCouponController = {
         endDate,
         discountType,
         discountValue,
-        categoryId,
+        categoryId: categoryId ? categoryId : coupon.categoryId,
+        minSpend: minSpend ? minSpend : coupon.minSpend,
       });
       return res.status(200).json({
         success: true,

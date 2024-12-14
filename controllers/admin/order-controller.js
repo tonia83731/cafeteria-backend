@@ -1,6 +1,8 @@
 const {
+  User,
   Product,
   Discount,
+  Coupon,
   Order,
   OrderItem,
   Payment,
@@ -17,7 +19,14 @@ const adminOrderController = {
       const orders = await Order.findAll({
         nest: true,
         include: [
-          Discount,
+          {
+            model: User,
+            // include: [Coupon],
+          },
+          {
+            model: Discount,
+            include: [Coupon],
+          },
           Payment,
           Shipping,
           {
@@ -26,8 +35,54 @@ const adminOrderController = {
           },
         ],
       });
+      // console.log(orders);
 
-      const orderDatas = orders.map((order) => order.toJSON());
+      let orderDatas = orders.map((order) => order.toJSON());
+      orderDatas = orderDatas.map((order) => ({
+        ...order,
+        orderer: {
+          name: order.User.name,
+          email: order.User.email,
+          phone: order.User.phone,
+        },
+        recipient: {
+          name: order.recipientName,
+          phone: order.recipientPhone,
+          address: order.recipientAddress,
+        },
+        payment: order.Payment.title.zh,
+        shipping: order.Shipping.title.zh,
+        discount: order.Discount
+          ? {
+              title: order.Discount.Coupon.title.zh,
+              code: order.Discount.Coupon.code,
+            }
+          : null,
+        orderItems: order.OrderItems.map((item) => ({
+          name: item.Product.title.zh,
+          quantity: item.quantity,
+          // price: item.Product.price,
+          price: item.price,
+          size: item.Size ? item.Size.title.zh : null,
+          sugar: item.Sugar ? item.Sugar.title.zh : null,
+          ice: item.Ice ? item.Ice.title.zh : null,
+          Product: undefined,
+          Size: undefined,
+          Sugar: undefined,
+          Ice: undefined,
+        })),
+        User: undefined,
+        OrderItems: undefined,
+        Payment: undefined,
+        Shipping: undefined,
+        // shippingId: undefined,
+        paymentId: undefined,
+        Discount: undefined,
+        discountId: undefined,
+        recipientName: undefined,
+        recipientPhone: undefined,
+        recipientAddress: undefined,
+      }));
 
       return res.status(200).json({
         success: true,

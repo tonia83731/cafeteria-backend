@@ -7,7 +7,7 @@ const userController = require("../../controllers/user-controller");
 // router.get("/orders/:userId", userController.getOrders);
 router.get("/cards/:cardId", userController.getCard);
 router.get("/", userController.getUser);
-router.patch("/", userController.updateUser);
+router.patch("/edit", userController.updateUser);
 router.patch("/invoice", userController.updateInvoice);
 router.patch("/language", userController.updateLanguagePerference);
 router.get("/cards", userController.getCards);

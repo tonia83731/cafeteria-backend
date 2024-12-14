@@ -3,6 +3,12 @@ module.exports = (sequelize, DataTypes) => {
   const CartItem = sequelize.define(
     "CartItem",
     {
+      id: {
+        // Explicitly define the `id` field if not present
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+      },
       cartId: DataTypes.INTEGER,
       productId: DataTypes.INTEGER,
       quantity: DataTypes.INTEGER,

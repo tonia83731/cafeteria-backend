@@ -40,6 +40,9 @@ module.exports = (sequelize, DataTypes) => {
     Order.belongsTo(models.Discount, {
       foreignKey: "discountId",
     });
+    Order.belongsTo(models.User, {
+      foreignKey: "userId",
+    });
   };
   return Order;
 };

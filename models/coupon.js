@@ -11,6 +11,7 @@ module.exports = (sequelize, DataTypes) => {
       discountType: DataTypes.STRING,
       discountValue: DataTypes.INTEGER,
       categoryId: DataTypes.INTEGER,
+      minSpend: DataTypes.INTEGER,
       isPublished: DataTypes.BOOLEAN,
     },
     {

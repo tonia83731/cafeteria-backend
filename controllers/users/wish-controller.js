@@ -5,9 +5,15 @@ const wishController = {
     try {
       const userId = req.user.id;
       // console.log(userId);
-      const wishes = await User.findByPk(userId, {
-        include: [{ model: Product, as: "WishedProducts" }],
+      // const wishes = await User.findByPk(userId, {
+      //   include: [{ model: Product, as: "WishedProducts" }],
+      // });
+      const wishes = await Wish.findAll({
+        where: { userId },
+        raw: true,
       });
+
+      // const wish_datas = wishes.toJSON();
       return res.status(200).json({
         success: true,
         data: wishes,
@@ -16,6 +22,29 @@ const wishController = {
       console.log(error);
     }
   },
+  getWishWithProducts: async (req, res, next) => {
+    try {
+      const userId = req.user.id;
+      const wishes = await User.findByPk(userId, {
+        include: [{ model: Product, as: "WishedProducts" }],
+      });
+
+      const wishes_res = wishes.toJSON();
+      const wishes_data = wishes_res.WishedProducts.map((item) => ({
+        ...item,
+        isWished: true,
+        Wish: undefined,
+      }));
+
+      return res.status(200).json({
+        success: true,
+        data: wishes_data,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+
   addProductToWish: async (req, res, next) => {
     try {
       const userId = req.user.id;

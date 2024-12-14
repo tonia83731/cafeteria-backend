@@ -1,5 +1,6 @@
 const { Product, Category, Size, Ice, Sugar } = require("../../models");
-const { imageFileHanlder } = require("../../helpers/file-helpers");
+// const { imageFileHanlder } = require("../../helpers/file-helpers");
+const { imgurFileHandler } = require("../../helpers/file-helpers");
 
 const adminProductController = {
   // -------------------- category --------------------
@@ -10,7 +11,7 @@ const adminProductController = {
       });
       return res.status(200).json({
         success: true,
-        categories,
+        data: categories,
       });
     } catch (error) {
       console.log(error);
@@ -19,10 +20,14 @@ const adminProductController = {
   // -------------------- product (edit) --------------------
   getProducts: async (req, res, next) => {
     try {
+      const categoryId = Number(req.query.categoryId) || "";
       const products = await Product.findAll({
         raw: true,
         nest: true,
         include: [Category],
+        where: {
+          ...(categoryId ? { categoryId } : {}),
+        },
       });
       let productData = products.map((product) => {
         return {
@@ -98,8 +103,11 @@ const adminProductController = {
         categoryId,
       } = req.body;
       const { file } = req;
-
-      const filePath = await imageFileHanlder(file);
+      const filePath = await imgurFileHandler(file);
+      // console.log(filePath);
+      const category = await Category.findByPk(categoryId, {
+        raw: true,
+      });
 
       if (!title_zh || !title_en)
         return res.status(400).json({
@@ -131,15 +139,20 @@ const adminProductController = {
       const new_product = await Product.create({
         title,
         description,
-        price,
-        categoryId,
+        price: Number(price),
+        categoryId: Number(categoryId),
         image: filePath || null,
       });
+
+      const newProduct = {
+        ...new_product.toJSON(),
+        categoryCode: category.code,
+      };
 
       return res.status(201).json({
         success: true,
         message: "Product created",
-        product: new_product,
+        data: newProduct,
       });
     } catch (error) {
       console.log(error);
@@ -157,15 +170,24 @@ const adminProductController = {
         categoryId,
       } = req.body;
       const { file } = req;
+      // console.log(req.body);
+      // const product = await Product.findByPk(productId);
 
-      const product = await Product.findByPk(productId);
+      const [product, category] = await Promise.all([
+        Product.findByPk(productId),
+        Category.findByPk(categoryId, {
+          raw: true,
+        }),
+      ]);
       if (!product)
         return res.status(404).json({
           success: false,
           message: "Product no found.",
         });
 
-      const filePath = file ? await imageFileHanlder(file) : product.image;
+      const filePath = file ? await imgurFileHandler(file) : product.image;
+      // console.log(file);
+      // console.log(filePath);
       const title = {
         zh: title_zh || product.title.zh,
         en: title_en || product.title.en,
@@ -178,15 +200,20 @@ const adminProductController = {
       const update_product = await product.update({
         title,
         description,
-        price: price || product.price,
-        categoryId: categoryId || product.categoryId,
+        price: Number(price) || product.price,
+        categoryId: Number(categoryId) || product.categoryId,
         image: filePath,
       });
+
+      const updatedProduct = {
+        ...update_product.toJSON(),
+        categoryCode: category.code,
+      };
 
       return res.status(201).json({
         success: true,
         message: "Product updated",
-        product: update_product,
+        data: updatedProduct,
       });
     } catch (error) {
       console.log(error);
@@ -207,6 +234,48 @@ const adminProductController = {
       return res.status(200).json({
         success: true,
         message: "Product delete",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  // -------------------- size --------------------
+  getSizes: async (req, res, next) => {
+    try {
+      const sizes = await Size.findAll({
+        raw: true,
+      });
+      return res.status(200).json({
+        success: true,
+        data: sizes,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  // -------------------- ice --------------------
+  getIces: async (req, res, next) => {
+    try {
+      const ices = await Ice.findAll({
+        raw: true,
+      });
+      return res.status(200).json({
+        success: true,
+        data: ices,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  // -------------------- sugar --------------------
+  getSugars: async (req, res, next) => {
+    try {
+      const sugars = await Sugar.findAll({
+        raw: true,
+      });
+      return res.status(200).json({
+        success: true,
+        data: sugars,
       });
     } catch (error) {
       console.log(error);

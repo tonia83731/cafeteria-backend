@@ -23,11 +23,36 @@ const cartController = {
           },
         ],
       });
+      // console.log(cart.CartItems);
 
       const total = cart.CartItems.reduce((acc, curr) => acc + curr.total, 0);
 
+      const cart_json = cart.toJSON();
+      // console.log(cart_json);
+
       const cart_data = {
-        ...cart.toJSON(),
+        ...cart_json,
+        cartItems: cart_json.CartItems.map((item) => ({
+          ...item,
+          product: {
+            title: item.Product.title,
+            image: item.Product.image,
+            price: item.Product.price,
+          },
+          size: item.sizeId
+            ? {
+                title: item.Size.title,
+                price: item.Size.price,
+              }
+            : null,
+          sugar: item.sugarId ? item.Sugar.title : null,
+          ice: item.iceId ? item.Ice.title : null,
+          Product: undefined,
+          Size: undefined,
+          Sugar: undefined,
+          Ice: undefined,
+        })),
+        CartItems: undefined,
         total,
       };
 
@@ -178,12 +203,44 @@ const cartController = {
           ? product.price * cartItem.quantity
           : (product.price + sizePrice) * cartItem.quantity;
 
-      const new_cartItem = await cartItem.save();
+      await cartItem.save();
+      const updatedCartItem = await cartItem.reload({
+        include: [Product, Size, Sugar, Ice],
+      });
+
+      const formattedCartItem = {
+        // ...formattedCartItem,
+        id: updatedCartItem.id,
+        quantity: updatedCartItem.quantity,
+        total: updatedCartItem.total,
+        sizeId: updatedCartItem.sizeId,
+        iceId: updatedCartItem.iceId,
+        sugarId: updatedCartItem.sugarId,
+        product: updatedCartItem.Product
+          ? {
+              title: updatedCartItem.Product.title,
+              image: updatedCartItem.Product.image,
+              price: updatedCartItem.Product.price,
+            }
+          : null,
+        size: updatedCartItem.sizeId
+          ? {
+              title: updatedCartItem.Size?.title,
+              price: updatedCartItem.Size?.price,
+            }
+          : null,
+        sugar: updatedCartItem.sugarId ? updatedCartItem.Sugar?.title : null,
+        ice: updatedCartItem.iceId ? updatedCartItem.Ice?.title : null,
+        // Product: undefined,
+        // Size: undefined,
+        // Sugar: undefined,
+        // Ice: undefined,
+      };
 
       return res.status(200).json({
         success: true,
         message: "Cart item updated successfully.",
-        data: new_cartItem,
+        data: formattedCartItem,
       });
     } catch (error) {
       console.log(error);

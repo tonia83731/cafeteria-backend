@@ -10,6 +10,8 @@ module.exports = (sequelize, DataTypes) => {
       phone: DataTypes.STRING,
       isAdmin: DataTypes.BOOLEAN,
       language: DataTypes.STRING,
+      invoice: DataTypes.STRING,
+      account: DataTypes.STRING,
     },
     {
       modelName: "User",
@@ -30,6 +32,9 @@ module.exports = (sequelize, DataTypes) => {
       as: "WishedProducts",
     });
     User.hasOne(models.Cart, {
+      foreignKey: "userId",
+    });
+    User.hasMany(models.Order, {
       foreignKey: "userId",
     });
   };
