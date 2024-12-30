@@ -8,9 +8,43 @@ const {
 const validator = require("validator");
 
 const userController = {
+  checkedUser: async (req, res, next) => {
+    const id = req.user.id;
+    const user = await User.findByPk(id);
+
+    // console.log(id, user);
+
+    if (!user)
+      return res.status(404).json({
+        success: false,
+        isAuth: false,
+        message: "User does not exist",
+      });
+
+    return res.status(200).json({
+      success: true,
+      isAuth: true,
+      user: {
+        id: user.id,
+        language: user.language,
+      },
+    });
+  },
   getUser: async (req, res, next) => {
     try {
-      const userId = req.user.id;
+      const id = req.user.id;
+
+      const { userId } = req.params;
+
+      // console.log(id, userId);
+
+      if (id !== Number(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Permission denied!",
+        });
+      }
+
       const user = await User.findByPk(userId);
 
       if (!user)
@@ -34,8 +68,15 @@ const userController = {
   },
   updateUser: async (req, res, next) => {
     try {
-      const userId = req.user.id;
-      const { name, password, phone, address } = req.body;
+      const id = req.user.id;
+      const { userId } = req.params;
+      const { name, email, account, password, phone, address } = req.body;
+      if (id !== Number(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Permission denied!",
+        });
+      }
       const user = await User.findByPk(userId);
 
       if (!user)
@@ -44,45 +85,50 @@ const userController = {
           message: "User does not exist",
         });
 
-      const update_fields = {};
-      if (name !== undefined) {
-        if (name.length > 50 || name.length < 3) {
-          return res.status(400).json({
-            success: false,
-            message: "Name must between 3-50 letters.",
-          });
-        }
-        update_fields.name = name;
+      if ((name && name.length > 50) || name.length < 3) {
+        return res.status(400).json({
+          success: false,
+          message: "Name must between 3-50 letters.",
+        });
       }
 
-      if (password !== undefined) {
-        if (
-          validator.isStrongPassword(password, {
-            minLength: 8,
-            minLowercase: 1,
-            minUppercase: 1,
-            minNumbers: 1,
-            minSymbols: 1,
-          })
-        ) {
-          return res.status(400).json({
-            success: false,
-            message:
-              "Required strong password (above 8 letters, 1 lowercase, 1 uppercase, 1 number and 1 symbol)",
-          });
-        }
-        const hash = await bcrypt.hash(password, 10);
-        update_fields.password = hash;
+      if (email && !validator.isEmail(email)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid email",
+        });
       }
 
-      if (phone !== undefined) update_fields.phone = phone;
-      if (address !== undefined) update_fields.address = address;
+      if (
+        password &&
+        !validator.isStrongPassword(password, {
+          minLength: 8,
+          minLowercase: 1,
+          minUppercase: 1,
+          minNumbers: 1,
+          minSymbols: 1,
+        })
+      ) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "Required strong password (above 8 letters, 1 lowercase, 1 uppercase, 1 number and 1 symbol)",
+        });
+      }
+
+      const update_fields = {
+        ...(name ? { name } : {}),
+        ...(email ? { email } : {}),
+        ...(account ? { account } : {}),
+        ...(password ? { password } : {}),
+        ...(phone ? { phone } : {}),
+        ...(address ? { address } : {}),
+      };
 
       const edit_user = await user.update(update_fields);
-      // delete edit_user.password;
+
       return res.status(200).json({
         success: true,
-        message: "User updated successfully.",
         data: edit_user,
       });
     } catch (error) {
@@ -113,8 +159,15 @@ const userController = {
   },
   updateLanguagePerference: async (req, res, next) => {
     try {
-      const userId = req.user.id;
+      const id = req.user.id;
+      const { userId } = req.params;
       const { language } = req.body;
+      if (id !== Number(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Permission denied!",
+        });
+      }
       const user = await User.findByPk(userId);
 
       if (!user)

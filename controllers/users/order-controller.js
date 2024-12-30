@@ -18,7 +18,14 @@ const orderController = {
   // note: clear cartitem after place order
   getOrders: async (req, res, next) => {
     try {
-      const userId = req.user.id;
+      const id = req.user.id;
+      const { userId } = req.params;
+      if (id !== Number(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Permission denied!",
+        });
+      }
       // console.log(userId);
       const orders = await Order.findAll({
         // raw: true,
@@ -77,8 +84,19 @@ const orderController = {
   },
   getOrder: async (req, res, next) => {
     try {
-      const { orderId } = req.params;
-      const order = await Order.findByPk(orderId, {
+      const id = req.user.id;
+      const { orderId, userId } = req.params;
+      if (id !== Number(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Permission denied!",
+        });
+      }
+      const order = await Order.findOne({
+        where: {
+          userId,
+          id: orderId,
+        },
         nest: true,
         include: [
           Discount,
@@ -123,7 +141,14 @@ const orderController = {
   },
   placeOrder: async (req, res, next) => {
     try {
-      const userId = req.user.id;
+      const id = req.user.id;
+      const { userId } = req.params;
+      if (id !== Number(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Permission denied!",
+        });
+      }
       // const { orderId } = req.params;
       const {
         recipientName,
@@ -214,8 +239,17 @@ const orderController = {
   },
   cancelOrder: async (req, res, next) => {
     try {
-      const { orderId } = req.params;
-      const order = await Order.findByPk(orderId);
+      const id = req.user.id;
+      const { orderId, userId } = req.params;
+      if (id !== Number(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Permission denied!",
+        });
+      }
+      const order = await Order.findOne({
+        where: { id: orderId, userId },
+      });
 
       if (order.status !== "pending") {
         return res.status(400).json({

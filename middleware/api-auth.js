@@ -6,11 +6,13 @@ const authenticated = (req, res, next) => {
     if (err || !user)
       return res.status(401).json({ success: false, message: "unauthorized" });
     req.user = user;
+    // console.log(user);
     next();
   })(req, res, next);
 };
 const authenticatedUser = (req, res, next) => {
   const user = getUser(req);
+  // console.log(user);
   if (user && !user.isAdmin) return next();
   return res.status(403).json({
     success: false,

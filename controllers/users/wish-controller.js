@@ -3,11 +3,16 @@ const { User, Product, Wish } = require("../../models");
 const wishController = {
   getWishes: async (req, res, next) => {
     try {
-      const userId = req.user.id;
-      // console.log(userId);
-      // const wishes = await User.findByPk(userId, {
-      //   include: [{ model: Product, as: "WishedProducts" }],
-      // });
+      const id = req.user.id;
+      const { userId } = req.params;
+
+      if (id !== Number(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Permission denied!",
+        });
+      }
+
       const wishes = await Wish.findAll({
         where: { userId },
         raw: true,
@@ -24,7 +29,15 @@ const wishController = {
   },
   getWishWithProducts: async (req, res, next) => {
     try {
-      const userId = req.user.id;
+      const id = req.user.id;
+      const { userId } = req.params;
+
+      if (id !== Number(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Permission denied!",
+        });
+      }
       const wishes = await User.findByPk(userId, {
         include: [{ model: Product, as: "WishedProducts" }],
       });
@@ -47,8 +60,15 @@ const wishController = {
 
   addProductToWish: async (req, res, next) => {
     try {
-      const userId = req.user.id;
-      const { productId } = req.params;
+      const id = req.user.id;
+      const { productId, userId } = req.params;
+
+      if (id !== Number(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Permission denied!",
+        });
+      }
 
       const [product, wish] = await Promise.all([
         Product.findByPk(productId),
@@ -87,8 +107,15 @@ const wishController = {
   },
   removeProductFromWish: async (req, res, next) => {
     try {
-      const userId = req.user.id;
-      const { productId } = req.params;
+      const id = req.user.id;
+      const { productId, userId } = req.params;
+
+      if (id !== Number(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Permission denied!",
+        });
+      }
 
       const wish = await Wish.findOne({
         userId,

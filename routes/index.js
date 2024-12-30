@@ -17,6 +17,7 @@ const order = require("./modules/order");
 const product = require("./modules/product");
 const productController = require("../controllers/product-controller");
 const orderController = require("../controllers/users/order-controller");
+const userController = require("../controllers/user-controller");
 
 router.use("/", auth);
 router.use("/", product);
@@ -27,6 +28,13 @@ router.get("/sugars", productController.getSugars);
 router.get("/ices", productController.getIces);
 router.get("/shippings", orderController.getShippings);
 router.get("/payments", orderController.getPayments);
+
+// router.get(
+//   "/users/checked-auth",
+//   authenticated,
+//   authenticatedUser,
+//   userController.checkedUser
+// );
 router.use("/users", authenticated, authenticatedUser, user);
 router.use("/wishes", authenticated, authenticatedUser, wish);
 router.use("/discounts", authenticated, authenticatedUser, discount);

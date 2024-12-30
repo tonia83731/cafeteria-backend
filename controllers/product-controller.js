@@ -4,29 +4,41 @@ const productController = {
   // edit
   getProducts: async (req, res, next) => {
     try {
-      const categoryId = req.query.categoryId
-        ? Number(req.query.categoryId)
-        : null;
+      const { page = "1", categoryId } = req.query;
+      const limit = 12;
+      const offset = (parseInt(page, 10) - 1) * limit;
 
-      console.log(categoryId);
-      const products = await Product.findAll({
+      const response = await Product.findAndCountAll({
         raw: true,
         nest: true,
         include: [Category],
         where: {
           ...(categoryId ? { categoryId } : {}),
         },
+        limit,
+        offset,
       });
-      let productData = products.map((product) => {
+
+      let products = response.rows.map((product) => {
         return {
           ...product,
           categoryCode: product.Category.code,
           Category: undefined,
         };
       });
+
+      const totalPages = Math.ceil(response.count / limit);
+
       return res.status(200).json({
         success: true,
-        data: productData,
+        data: {
+          products,
+          pagination: {
+            currentPage: parseInt(page, 10),
+            totalPages,
+            itemsPerPage: limit,
+          },
+        },
       });
     } catch (error) {
       console.log(error);

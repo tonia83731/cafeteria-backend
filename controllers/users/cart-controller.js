@@ -66,13 +66,22 @@ const cartController = {
   },
   addCartItem: async (req, res, next) => {
     try {
-      const userId = req.user.id;
-      if (!userId) {
+      const id = req.user.id;
+      const { userId } = req.params;
+
+      if (id !== Number(userId) || !userId) {
         return res.status(400).json({
           success: false,
-          message: "Please login first to add cart.",
+          message: "Permission denied!",
         });
       }
+
+      // if (!userId) {
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: "Please login first to add cart.",
+      //   });
+      // }
 
       const cart = await Cart.findOne({ where: { userId }, raw: true });
       if (!cart) {

@@ -3,7 +3,14 @@ const { User, Product, Discount, Coupon } = require("../../models");
 const discountController = {
   getDiscounts: async (req, res, next) => {
     try {
-      const userId = req.user.id;
+      const id = req.user.id;
+      const { userId } = req.params;
+      if (id !== Number(userId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Permission denied!",
+        });
+      }
       const discounts = await Discount.findAll({
         where: { userId, isApplied: false },
         include: [Coupon],
@@ -11,7 +18,7 @@ const discountController = {
 
       // Transform the data
       const discounts_data = discounts.map((discount) => {
-        const discountData = discount.toJSON(); // Convert the Sequelize instance to a plain object
+        const discountData = discount.toJSON();
         const {
           code,
           title,
@@ -21,7 +28,7 @@ const discountController = {
           startDate,
           endDate,
           isPublished,
-        } = discountData.Coupon || {}; // Handle potential null Coupon association
+        } = discountData.Coupon || {};
 
         return {
           ...discountData,
