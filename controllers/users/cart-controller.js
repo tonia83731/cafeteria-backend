@@ -12,7 +12,15 @@ const {
 const cartController = {
   getCart: async (req, res, next) => {
     try {
-      const userId = req.user.id;
+      const id = req.user.id;
+      const { userId } = req.params;
+
+      if (id !== Number(userId) || !userId) {
+        return res.status(400).json({
+          success: false,
+          message: "Permission denied!",
+        });
+      }
       const cart = await Cart.findOne({
         nest: true,
         where: { userId },
@@ -75,13 +83,6 @@ const cartController = {
           message: "Permission denied!",
         });
       }
-
-      // if (!userId) {
-      //   return res.status(400).json({
-      //     success: false,
-      //     message: "Please login first to add cart.",
-      //   });
-      // }
 
       const cart = await Cart.findOne({ where: { userId }, raw: true });
       if (!cart) {
@@ -160,11 +161,12 @@ const cartController = {
   },
   updateCartItem: async (req, res, next) => {
     try {
-      const userId = req.user.id;
-      if (!userId) {
+      const id = req.user.id;
+      const { userId, cartItemId } = req.params;
+      if (id !== Number(userId) || !userId) {
         return res.status(400).json({
           success: false,
-          message: "Please login first to add cart.",
+          message: "Permission denied!",
         });
       }
 
@@ -176,7 +178,6 @@ const cartController = {
         });
       }
       const cartId = cart.id;
-      const { cartItemId } = req.params;
 
       const cartItem = await CartItem.findOne({
         where: {
@@ -257,11 +258,13 @@ const cartController = {
   },
   deleteCartItem: async (req, res, next) => {
     try {
-      const userId = req.user.id;
-      if (!userId) {
+      const id = req.user.id;
+      const { userId, cartItemId } = req.params;
+
+      if (id !== Number(userId) || !userId) {
         return res.status(400).json({
           success: false,
-          message: "Please login first to add cart.",
+          message: "Permission denied!",
         });
       }
 
@@ -273,7 +276,6 @@ const cartController = {
         });
       }
       const cartId = cart.id;
-      const { cartItemId } = req.params;
 
       const cartItem = await CartItem.findOne({
         where: {
