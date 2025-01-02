@@ -38,14 +38,17 @@ const cartController = {
       const cart_json = cart.toJSON();
       // console.log(cart_json);
 
+      // console.log(cart_json.CartItems);
       const cart_data = {
         ...cart_json,
         cartItems: cart_json.CartItems.map((item) => ({
           ...item,
           product: {
+            id: item.productId,
             title: item.Product.title,
             image: item.Product.image,
             price: item.Product.price,
+            categoryId: item.Product.categoryId,
           },
           size: item.sizeId
             ? {
@@ -59,6 +62,7 @@ const cartController = {
           Size: undefined,
           Sugar: undefined,
           Ice: undefined,
+          productId: undefined,
         })),
         CartItems: undefined,
         total,
@@ -177,6 +181,101 @@ const cartController = {
           message: "Cart no found.",
         });
       }
+
+      const cartItem = await CartItem.findOne({
+        where: {
+          id: cartItemId,
+          cartId: cart.id,
+        },
+      });
+
+      if (!cartItem)
+        return res.status(404).json({
+          success: false,
+          message: "CartItem no found.",
+        });
+
+      const { sizeId, iceId, sugarId, total } = req.body;
+
+      if (total !== undefined && total < 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid total value.",
+        });
+      }
+
+      cartItem.sizeId = sizeId;
+      cartItem.iceId = iceId;
+      cartItem.sugarId = sugarId;
+      cartItem.total = total;
+
+      await cartItem.save();
+
+      const updatedCartItem = await CartItem.findByPk(cartItem.id, {
+        nest: true,
+        where: { userId },
+        include: [Product, Size, Sugar, Ice],
+      });
+
+      const updatedCartItemJson = updatedCartItem.toJSON();
+
+      const formattedCartItem = {
+        ...updatedCartItemJson,
+        id: updatedCartItemJson.id,
+        cartId: updatedCartItemJson.cartId,
+        quantity: updatedCartItemJson.quantity,
+        sizeId: updatedCartItemJson.sizeId,
+        iceId: updatedCartItemJson.iceId,
+        sugarId: updatedCartItemJson.sugarId,
+        total: updatedCartItemJson.total,
+        product: {
+          id: updatedCartItemJson.productId,
+          title: updatedCartItemJson.Product.title,
+          image: updatedCartItemJson.Product.image,
+          price: updatedCartItemJson.Product.price,
+          categoryId: updatedCartItemJson.Product.categoryId,
+        },
+        size: updatedCartItemJson.sizeId
+          ? {
+              title: updatedCartItemJson.Size.title,
+              price: updatedCartItemJson.Size.price,
+            }
+          : null,
+        sugar: updatedCartItemJson.sugarId
+          ? updatedCartItemJson.Sugar.title
+          : null,
+        ice: updatedCartItemJson.iceId ? updatedCartItemJson.Ice.title : null,
+        createdAt: updatedCartItemJson.createdAt,
+        updatedAt: updatedCartItemJson.updatedAt,
+      };
+
+      return res.status(200).json({
+        success: true,
+        message: "Cart item updated successfully.",
+        data: formattedCartItem,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  updatedCartItemQuantity: async (req, res, next) => {
+    try {
+      const id = req.user.id;
+      const { userId, cartItemId } = req.params;
+      if (id !== Number(userId) || !userId) {
+        return res.status(400).json({
+          success: false,
+          message: "Permission denied!",
+        });
+      }
+
+      const cart = await Cart.findOne({ where: { userId }, raw: true });
+      if (!cart) {
+        return res.status(404).json({
+          success: false,
+          message: "Cart no found.",
+        });
+      }
       const cartId = cart.id;
 
       const cartItem = await CartItem.findOne({
@@ -192,65 +291,16 @@ const cartController = {
           message: "CartItem no found.",
         });
 
-      const { quantity, sizeId, iceId, sugarId } = req.body;
+      const { quantity, total } = req.body;
 
-      if (quantity) cartItem.quantity = quantity;
-      if (sizeId) cartItem.sizeId = sizeId;
-      if (iceId) cartItem.iceId = iceId;
-      if (sugarId) cartItem.sugarId = sugarId;
-
-      const product = await Product.findByPk(cartItem.productId);
-
-      if (!product)
-        return res.status(404).json({
-          success: false,
-          message: "Product no found for the cart item.",
-        });
-
-      const sizePrice = sizeId ? (await Size.findByPk(sizeId))?.price || 0 : 0;
-      cartItem.total =
-        product.categoryId === 6
-          ? product.price * cartItem.quantity
-          : (product.price + sizePrice) * cartItem.quantity;
-
-      await cartItem.save();
-      const updatedCartItem = await cartItem.reload({
-        include: [Product, Size, Sugar, Ice],
-      });
-
-      const formattedCartItem = {
-        // ...formattedCartItem,
-        id: updatedCartItem.id,
-        quantity: updatedCartItem.quantity,
-        total: updatedCartItem.total,
-        sizeId: updatedCartItem.sizeId,
-        iceId: updatedCartItem.iceId,
-        sugarId: updatedCartItem.sugarId,
-        product: updatedCartItem.Product
-          ? {
-              title: updatedCartItem.Product.title,
-              image: updatedCartItem.Product.image,
-              price: updatedCartItem.Product.price,
-            }
-          : null,
-        size: updatedCartItem.sizeId
-          ? {
-              title: updatedCartItem.Size?.title,
-              price: updatedCartItem.Size?.price,
-            }
-          : null,
-        sugar: updatedCartItem.sugarId ? updatedCartItem.Sugar?.title : null,
-        ice: updatedCartItem.iceId ? updatedCartItem.Ice?.title : null,
-        // Product: undefined,
-        // Size: undefined,
-        // Sugar: undefined,
-        // Ice: undefined,
-      };
+      cartItem.quantity = quantity;
+      cartItem.total = total;
+      const updatedItem = await cartItem.save();
 
       return res.status(200).json({
         success: true,
-        message: "Cart item updated successfully.",
-        data: formattedCartItem,
+        message: "Quantity updated successfully.",
+        data: updatedItem,
       });
     } catch (error) {
       console.log(error);

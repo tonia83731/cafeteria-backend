@@ -1,4 +1,4 @@
-const { User, Card } = require("../models");
+const { User, Card, Cart, CartItem } = require("../models");
 const {
   creditCartType,
   ecryptCardNumber,
@@ -10,24 +10,27 @@ const validator = require("validator");
 const userController = {
   checkedUser: async (req, res, next) => {
     const id = req.user.id;
-    const user = await User.findByPk(id);
-
-    // console.log(id, user);
-
-    if (!user)
-      return res.status(404).json({
-        success: false,
-        isAuth: false,
-        message: "User does not exist",
-      });
+    const user = await User.findByPk(id, {
+      include: [
+        {
+          model: Cart,
+          include: [CartItem],
+        },
+      ],
+    });
 
     return res.status(200).json({
       success: true,
-      isAuth: true,
-      user: {
-        id: user.id,
-        language: user.language,
-      },
+      isAuth: user ? true : false,
+      user: user
+        ? {
+            id: user.id,
+            language: user.language,
+          }
+        : null,
+      cartQty: user
+        ? user.Cart.CartItems.reduce((acc, curr) => acc + curr.quantity, 0)
+        : 0,
     });
   },
   getUser: async (req, res, next) => {
