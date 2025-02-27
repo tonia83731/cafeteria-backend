@@ -6,12 +6,9 @@ module.exports = (sequelize, DataTypes) => {
       title: DataTypes.JSON,
       description: DataTypes.JSON,
       code: DataTypes.STRING,
-      startDate: DataTypes.DATE,
       endDate: DataTypes.DATE,
       discountType: DataTypes.STRING,
       discountValue: DataTypes.INTEGER,
-      categoryId: DataTypes.INTEGER,
-      minSpend: DataTypes.INTEGER,
       isPublished: DataTypes.BOOLEAN,
     },
     {
