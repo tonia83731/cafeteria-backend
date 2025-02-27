@@ -1,4 +1,16 @@
-const { User, Card, Cart, CartItem } = require("../models");
+const {
+  User,
+  Cart,
+  CartItem,
+  Product,
+  Wish,
+  Discount,
+  Coupon,
+  Payment,
+  Shipping,
+  Order,
+  OrderItem,
+} = require("../models");
 const {
   creditCartType,
   ecryptCardNumber,
@@ -6,6 +18,8 @@ const {
   hideCardNumber,
 } = require("../helpers/card-helpers");
 const validator = require("validator");
+const bcrypt = require("bcryptjs");
+const { where } = require("sequelize");
 
 const userController = {
   checkedUser: async (req, res, next) => {
@@ -25,6 +39,7 @@ const userController = {
       user: user
         ? {
             id: user.id,
+            account: user.account,
             language: user.language,
           }
         : null,
@@ -37,24 +52,25 @@ const userController = {
     try {
       const id = req.user.id;
 
-      const { userId } = req.params;
-
-      // console.log(id, userId);
-
-      if (id !== Number(userId)) {
-        return res.status(400).json({
-          success: false,
-          message: "Permission denied!",
-        });
-      }
-
-      const user = await User.findByPk(userId);
+      const { account } = req.params;
+      const user = await User.findOne({
+        where: { account },
+      });
 
       if (!user)
         return res.status(404).json({
           success: false,
           message: "User does not exist",
         });
+
+      // const userId = user.id;
+
+      // if (id !== userId) {
+      //   return res.status(400).json({
+      //     success: false,
+      //     message: "Permission denied!",
+      //   });
+      // }
 
       let userData = user.toJSON();
 
@@ -72,21 +88,28 @@ const userController = {
   updateUser: async (req, res, next) => {
     try {
       const id = req.user.id;
-      const { userId } = req.params;
-      const { name, email, account, password, phone, address } = req.body;
-      if (id !== Number(userId)) {
-        return res.status(400).json({
-          success: false,
-          message: "Permission denied!",
-        });
-      }
-      const user = await User.findByPk(userId);
+      const { account } = req.params;
+      const { name, email, password, phone, address, language, invoice } =
+        req.body;
+
+      const user = await User.findOne({
+        where: { account },
+      });
 
       if (!user)
         return res.status(404).json({
           success: false,
           message: "User does not exist",
         });
+
+      const userId = user.id;
+
+      if (id !== userId) {
+        return res.status(400).json({
+          success: false,
+          message: "Permission denied!",
+        });
+      }
 
       if ((name && name.length > 50) || name.length < 3) {
         return res.status(400).json({
@@ -119,166 +142,226 @@ const userController = {
         });
       }
 
-      const update_fields = {
-        ...(name ? { name } : {}),
-        ...(email ? { email } : {}),
-        ...(account ? { account } : {}),
-        ...(password ? { password } : {}),
-        ...(phone ? { phone } : {}),
-        ...(address ? { address } : {}),
+      const hash = password ? await bcrypt.hash(password, 10) : user.password;
+
+      let editUser = await user.update({
+        name,
+        email,
+        password: hash,
+        phone,
+        address,
+        language,
+        invoice,
+      });
+
+      editUser = {
+        ...editUser.toJSON(),
+        password: undefined,
       };
 
-      const edit_user = await user.update(update_fields);
-
       return res.status(200).json({
         success: true,
-        data: edit_user,
+        data: editUser,
       });
     } catch (error) {
       console.log(error);
       next();
     }
   },
-  updateInvoice: async (req, res, next) => {
+  // ---------------------- WISH ----------------------
+  getWishesWithProducts: async (req, res, next) => {
     try {
-      const userId = req.user.id;
-      const { invoice } = req.body;
-      const user = await User.findByPk(userId);
+      // const id = req.user.id;
+      const { account } = req.params;
+      const user = await User.findOne({
+        where: { account },
+        include: [{ model: Product, as: "WishedProducts" }],
+      });
 
       if (!user)
         return res.status(404).json({
           success: false,
-          message: "User does not exist",
+          message: "User no found.",
         });
 
-      await user.update({ invoice });
-      return res
-        .status(200)
-        .json({ success: true, message: "User invoice updated." });
+      const data = user.WishedProducts.map(({ Wish, ...product }) => ({
+        ...product,
+        isWished: true,
+      }));
+
+      return res.status(200).json({
+        success: true,
+        data,
+      });
     } catch (error) {
       console.log(error);
-      next();
     }
   },
-  updateLanguagePerference: async (req, res, next) => {
+  addProductToWish: async (req, res, next) => {
     try {
-      const id = req.user.id;
-      const { userId } = req.params;
-      const { language } = req.body;
-      if (id !== Number(userId)) {
-        return res.status(400).json({
-          success: false,
-          message: "Permission denied!",
-        });
-      }
-      const user = await User.findByPk(userId);
+      const { account, productId } = req.params;
+
+      const [user, product] = await Promise.all([
+        User.findOne({
+          where: { account },
+        }),
+        Product.findByPk(productId),
+      ]);
 
       if (!user)
         return res.status(404).json({
           success: false,
-          message: "User does not exist",
+          message: "User no found.",
         });
 
-      const validLanguages = ["zh", "en"];
-      if (!validLanguages.includes(language))
+      if (!product)
         return res.status(404).json({
           success: false,
-          message: "Language invalid. Supported languages are 'zh' and 'en'.",
+          message: "Product no found.",
         });
 
-      if (language === user.language)
-        return res.status(200).json({
-          success: true,
-          message: "Language is already updated.",
-        });
-      await user.update({ language });
-      return res
-        .status(200)
-        .json({ success: true, message: "Language perferences updated." });
-    } catch (error) {
-      console.log(error);
-      next();
-    }
-  },
-  getCards: async (req, res, next) => {
-    try {
-      const userId = req.user.id;
-      const cards = await Card.findAll({
-        raw: true,
-        where: { userId },
-      });
-
-      const cardDatas = cards.map((card) => {
-        const decryptCard = decryptCardNumber(card.cardNumber);
-        const partCard = hideCardNumber(decryptCard);
-        return {
-          ...card,
-          cardNumber: partCard,
-        };
-      });
-
-      return res.status(200).json({
-        success: true,
-        data: cardDatas,
-      });
-    } catch (error) {
-      console.log(error);
-      next();
-    }
-  },
-  getCard: async (req, res, next) => {
-    try {
-      const userId = req.user.id;
-      const { cardId } = req.params;
-
-      const card = await Card.findOne({
-        raw: true,
+      const [_, created] = await Wish.fondOrCreate({
         where: {
-          id: cardId,
-          userId,
+          userId: user.id,
+          productId,
+        },
+        defaults: {
+          userId: user.id,
+          productId,
         },
       });
 
-      if (!card)
+      return res.status(created ? 201 : 200).json({
+        success: true,
+        message: created ? "Product added." : "Product already existed.",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  removeProductFromWish: async (req, res, next) => {
+    try {
+      const { account, productId } = req.params;
+      const user = await User.findOne({
+        where: { account },
+      });
+
+      if (!user)
         return res.status(404).json({
           success: false,
-          message: "Card no found",
+          message: "User no found.",
         });
 
-      const decryptCard = decryptCardNumber(card.cardNumber);
+      const wish = await Wish.findOne({
+        where: {
+          userId: user.id,
+          productId,
+        },
+      });
 
-      card.cardNumber = decryptCard;
+      if (!wish)
+        return res.status(200).json({
+          success: false,
+          message: "Product not in wish.",
+        });
+
+      await wish.destroy();
 
       return res.status(200).json({
         success: true,
-        data: card,
+        message: "Product removed from wish.",
       });
     } catch (error) {
       console.log(error);
-      next();
     }
   },
-  addCard: async (req, res, next) => {
+  // ---------------------- ORDER ----------------------
+  getOrders: async (req, res, next) => {
     try {
-      const userId = req.user.id;
-      const { cardNumber, expirationDate } = req.body;
-      const cardType = creditCartType(cardNumber);
-      const ecryptCard = ecryptCardNumber(cardNumber);
-      const new_card = await Card.create({
-        userId,
-        cardNumber: ecryptCard,
-        cardType,
-        expirationDate,
+      const { account } = req.params;
+
+      const user = await User.findOne({
+        where: { account },
       });
 
-      return res.status(201).json({
+      if (!user)
+        return res.status(404).json({
+          success: false,
+          message: "User no found.",
+        });
+
+      const orders = await Order.findAll({
+        nest: true,
+        where: { userId: user.id },
+        include: [
+          {
+            model: Discount,
+            include: [Coupon],
+          },
+          Payment,
+          Shipping,
+          OrderItem,
+        ],
+      });
+
+      res.status(200).json({
         success: true,
-        message: "Credit card added.",
-        data: new_card,
+        data: orders,
       });
     } catch (error) {
       console.log(error);
-      next();
+    }
+  },
+  getOrder: async (req, res, next) => {
+    try {
+      const { account, orderId } = req.params;
+      const user = await User.findOne({
+        where: { account },
+      });
+
+      if (!user)
+        return res.status(404).json({
+          success: false,
+          message: "User no found.",
+        });
+
+      const order = await Order.findOne({
+        where: {
+          id: orderId,
+          userId: user.id,
+        },
+        nest: true,
+        include: [
+          Discount,
+          {
+            model: OrderItem,
+            include: [Product, Size, Sugar, Ice],
+          },
+        ],
+      });
+
+      return res.status(200).json({
+        success: true,
+        data: order,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  cancelOrder: async (req, res, next) => {
+    try {
+      const { account, orderId } = req.params;
+      const user = await User.findOne({
+        where: { account },
+      });
+
+      if (!user)
+        return res.status(404).json({
+          success: false,
+          message: "User no found.",
+        });
+    } catch (error) {
+      console.log(error);
     }
   },
 };

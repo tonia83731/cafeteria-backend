@@ -1,0 +1,56 @@
+
+# ORDER STATUS
+
+0: Pending
+1: Processing
+2: Delivery/Pickup
+3: Completed
+4: Canceled
+
+----------------------------
+
+# SHIPPINGS METHOD
+
+0: Pickup
+1: Delivery
+
+----------------------------
+
+# PAYMENTS
+
+0: Cash
+1: Debit/Credit Card
+
+----------------------------
+
+# SIZE
+
+0: Small
+1: Medium +10
+2: Large  +15
+
+----------------------------
+
+# Ice
+
+0: Hot
+1: No Ice
+2: Regular
+3: Extra Ice
+
+----------------------------
+
+# Sugar
+
+0: No Sugar
+1: Half Sugar
+2: Regular Sugar
+3: Extra Sugar
+
+----------------------------
+
+# Discount Type
+
+0: Percent
+1: Price
+

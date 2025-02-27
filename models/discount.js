@@ -14,7 +14,6 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   Discount.associate = function (models) {
-    // associations can be defined here
     Discount.belongsTo(models.User, {
       foreignKey: "userId",
     });

@@ -28,23 +28,20 @@ const authController = {
           message: "Invalid email.",
         });
 
-      const existingUser = await User.findOne({
+      const existingEmail = await User.findOne({
         where: { email },
       });
 
-      if (existingUser)
+      const existingAccount = await User.findOne({
+        where: { account },
+      });
+
+      if (existingEmail || existingAccount)
         return res.status(400).json({
           success: false,
           message: "User already existed.",
         });
 
-      // if (!validator.equals(password, confirmPassword))
-      //   return res.status(400).json({
-      //     success: false,
-      //     message: "Password and confirmPassword are not the same.",
-      //   });
-
-      // { minLength: 8, minLowercase: 1, minUppercase: 1, minNumbers: 1, minSymbols: 1, returnScore: false, pointsPerUnique: 1, pointsPerRepeat: 0.5, pointsForContainingLower: 10, pointsForContainingUpper: 10, pointsForContainingNumber: 10, pointsForContainingSymbol: 10 }
       if (
         !validator.isStrongPassword(password, {
           minLength: 8,
@@ -71,12 +68,13 @@ const authController = {
       });
 
       user = user.toJSON();
-      // create cart when user create
+
       const cart = await Cart.create({
         userId: user.id,
       });
+
       delete user.password;
-      // resSuccessHelpers(res, { user, cart }, 201);
+
       return res.status(201).json({
         success: true,
         message: "User and user cart created.",
@@ -97,23 +95,17 @@ const authController = {
           success: false,
           message: "Email, password cannot be blank",
         });
-      // const user = await User.findOne({
-      //   where: { email },
-      //   include: [
-      //     {
-      //       model: Language,
-      //       as: "Language",
-      //     },
-      //   ],
-      // });
+
       const user = await User.findOne({
         where: { email },
       });
+
       if (!user || user.isAdmin)
         return res.status(404).json({
           success: false,
           message: "User does not exist",
         });
+
       if (!bcrypt.compareSync(password, user.password))
         return res.status(400).json({
           success: false,

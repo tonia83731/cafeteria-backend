@@ -23,14 +23,6 @@ module.exports = (sequelize, DataTypes) => {
     Order.hasMany(models.OrderItem, {
       foreignKey: "orderId",
     });
-    Order.belongsTo(models.Payment, {
-      foreignKey: "paymentId", // Links `Orders.paymentId` to `Payments.id`
-    });
-
-    // An Order belongs to Shipping
-    Order.belongsTo(models.Shipping, {
-      foreignKey: "shippingId",
-    });
     Order.belongsToMany(models.Product, {
       through: models.OrderItem,
       foreignKey: "orderId",

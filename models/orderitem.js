@@ -18,20 +18,11 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   OrderItem.associate = function (models) {
-    OrderItem.belongsTo(models.Order, {
-      foreignKey: "orderId",
-    });
-    OrderItem.belongsTo(models.Size, {
-      foreignKey: "sizeId",
-    });
-    OrderItem.belongsTo(models.Sugar, {
-      foreignKey: "sugarId",
-    });
-    OrderItem.belongsTo(models.Ice, {
-      foreignKey: "iceId",
-    });
     OrderItem.belongsTo(models.Product, {
       foreignKey: "productId",
+    });
+    OrderItem.belongsTo(models.Order, {
+      foreignKey: "orderId",
     });
   };
   return OrderItem;

@@ -21,7 +21,6 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   Coupon.associate = function (models) {
-    // associations can be defined here
     Coupon.hasMany(models.Discount, {
       foreignKey: "couponId",
     });

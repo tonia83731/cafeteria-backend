@@ -5,13 +5,13 @@ module.exports = (sequelize, DataTypes) => {
     {
       name: DataTypes.STRING,
       email: DataTypes.STRING,
+      account: DataTypes.STRING,
       password: DataTypes.STRING,
       address: DataTypes.STRING,
       phone: DataTypes.STRING,
       isAdmin: DataTypes.BOOLEAN,
       language: DataTypes.STRING,
       invoice: DataTypes.STRING,
-      account: DataTypes.STRING,
     },
     {
       modelName: "User",
@@ -21,9 +21,6 @@ module.exports = (sequelize, DataTypes) => {
   );
   User.associate = function (models) {
     User.hasMany(models.Discount, {
-      foreignKey: "userId",
-    });
-    User.hasMany(models.Card, {
       foreignKey: "userId",
     });
     User.belongsToMany(models.Product, {
