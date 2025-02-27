@@ -6,8 +6,6 @@ const {
   Wish,
   Discount,
   Coupon,
-  Payment,
-  Shipping,
   Order,
   OrderItem,
 } = require("../models");
@@ -169,6 +167,7 @@ const userController = {
     }
   },
   // ---------------------- WISH ----------------------
+
   getWishesWithProducts: async (req, res, next) => {
     try {
       // const id = req.user.id;
@@ -298,8 +297,6 @@ const userController = {
             model: Discount,
             include: [Coupon],
           },
-          Payment,
-          Shipping,
           OrderItem,
         ],
       });
@@ -335,7 +332,7 @@ const userController = {
           Discount,
           {
             model: OrderItem,
-            include: [Product, Size, Sugar, Ice],
+            include: [Product],
           },
         ],
       });
@@ -360,6 +357,13 @@ const userController = {
           success: false,
           message: "User no found.",
         });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  // ---------------------- COUPONS ----------------------
+  getDiscounts: async (req, res, next) => {
+    try {
     } catch (error) {
       console.log(error);
     }

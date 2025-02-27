@@ -1,4 +1,4 @@
-const { Product, Category, Size, Ice, Sugar } = require("../../models");
+const { Product, Category } = require("../../models");
 // const { imageFileHanlder } = require("../../helpers/file-helpers");
 const { imgurFileHandler } = require("../../helpers/file-helpers");
 
@@ -234,48 +234,6 @@ const adminProductController = {
       return res.status(200).json({
         success: true,
         message: "Product delete",
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  },
-  // -------------------- size --------------------
-  getSizes: async (req, res, next) => {
-    try {
-      const sizes = await Size.findAll({
-        raw: true,
-      });
-      return res.status(200).json({
-        success: true,
-        data: sizes,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  },
-  // -------------------- ice --------------------
-  getIces: async (req, res, next) => {
-    try {
-      const ices = await Ice.findAll({
-        raw: true,
-      });
-      return res.status(200).json({
-        success: true,
-        data: ices,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  },
-  // -------------------- sugar --------------------
-  getSugars: async (req, res, next) => {
-    try {
-      const sugars = await Sugar.findAll({
-        raw: true,
-      });
-      return res.status(200).json({
-        success: true,
-        data: sugars,
       });
     } catch (error) {
       console.log(error);

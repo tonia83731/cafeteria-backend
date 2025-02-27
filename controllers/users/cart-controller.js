@@ -163,6 +163,7 @@ const cartController = {
       });
     }
   },
+  // merge updated
   updateCartItem: async (req, res, next) => {
     try {
       const id = req.user.id;

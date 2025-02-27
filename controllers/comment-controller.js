@@ -51,7 +51,7 @@ const commentController = {
           success: false,
           message: "Comment cannot exceed 500 words.",
         });
-      const new_comment = await Comment.create({
+      await Comment.create({
         name,
         email,
         rate,
@@ -60,7 +60,7 @@ const commentController = {
       return res.status(201).json({
         success: true,
         message: "Comment created!",
-        data: new_comment,
+        // data: new_comment,
       });
     } catch (error) {
       console.log(error);
