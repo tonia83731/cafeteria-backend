@@ -1,0 +1,101 @@
+"use strict";
+
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    await queryInterface.bulkInsert("OrderItems", [
+      {
+        order_id: 4,
+        product_id: 45,
+        quantity: 3,
+        size: 1,
+        ice: 0,
+        sugar: 0,
+        price: 180,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        order_id: 4,
+        product_id: 45,
+        quantity: 2,
+        size: 1,
+        ice: 2,
+        sugar: 0,
+        price: 120,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        order_id: 4,
+        product_id: 46,
+        quantity: 3,
+        size: 1,
+        ice: 0,
+        sugar: 0,
+        price: 210,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        order_id: 4,
+        product_id: 47,
+        quantity: 3,
+        size: 1,
+        ice: 0,
+        sugar: 0,
+        price: 210,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+
+      {
+        order_id: 5,
+        product_id: 73,
+        quantity: 1,
+        size: null,
+        ice: null,
+        sugar: null,
+        price: 120,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        order_id: 5,
+        product_id: 74,
+        quantity: 2,
+        size: null,
+        ice: null,
+        sugar: null,
+        price: 180,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        order_id: 5,
+        product_id: 45,
+        quantity: 2,
+        size: 1,
+        ice: 0,
+        sugar: 0,
+        price: 120,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+      {
+        order_id: 5,
+        product_id: 47,
+        quantity: 1,
+        size: 1,
+        ice: 0,
+        sugar: 0,
+        price: 70,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    ]);
+  },
+
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.bulkDelete("OrderItems", {});
+  },
+};
