@@ -1,14 +1,4 @@
-const {
-  User,
-  Cart,
-  CartItem,
-  Product,
-  Wish,
-  Discount,
-  Coupon,
-  Order,
-  OrderItem,
-} = require("../models");
+const { User, Cart, CartItem } = require("../models");
 
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
@@ -158,94 +148,6 @@ const userController = {
     } catch (error) {
       console.log(error);
       next();
-    }
-  },
-
-  // ---------------------- ORDER ----------------------
-  getOrders: async (req, res, next) => {
-    try {
-      const { account } = req.params;
-
-      const user = await User.findOne({
-        where: { account },
-      });
-
-      if (!user)
-        return res.status(404).json({
-          success: false,
-          message: "User no found.",
-        });
-
-      const orders = await Order.findAll({
-        nest: true,
-        where: { userId: user.id },
-        include: [
-          {
-            model: Discount,
-            include: [Coupon],
-          },
-          OrderItem,
-        ],
-      });
-
-      res.status(200).json({
-        success: true,
-        data: orders,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  },
-  getOrder: async (req, res, next) => {
-    try {
-      const { account, orderId } = req.params;
-      const user = await User.findOne({
-        where: { account },
-      });
-
-      if (!user)
-        return res.status(404).json({
-          success: false,
-          message: "User no found.",
-        });
-
-      const order = await Order.findOne({
-        where: {
-          id: orderId,
-          userId: user.id,
-        },
-        nest: true,
-        include: [
-          Discount,
-          {
-            model: OrderItem,
-            include: [Product],
-          },
-        ],
-      });
-
-      return res.status(200).json({
-        success: true,
-        data: order,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  },
-  cancelOrder: async (req, res, next) => {
-    try {
-      const { account, orderId } = req.params;
-      const user = await User.findOne({
-        where: { account },
-      });
-
-      if (!user)
-        return res.status(404).json({
-          success: false,
-          message: "User no found.",
-        });
-    } catch (error) {
-      console.log(error);
     }
   },
 };
