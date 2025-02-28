@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
       title: DataTypes.JSON,
       description: DataTypes.JSON,
       code: DataTypes.STRING,
-      endDate: DataTypes.DATE,
+      endDate: DataTypes.INTEGER,
       discountType: DataTypes.STRING,
       discountValue: DataTypes.INTEGER,
       isPublished: DataTypes.BOOLEAN,

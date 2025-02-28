@@ -1,10 +1,9 @@
 const express = require("express");
 const router = express.Router();
+const userOrderController = require("../../controllers/user-order-controller");
 
-const orderController = require("../../controllers/users/order-controller");
-
-router.get("/:userId/:orderId", orderController.getOrder);
-router.patch("/:userId/:orderId/cancel-order", orderController.cancelOrder);
-router.get("/:userId", orderController.getOrders);
-router.post("/:userId", orderController.placeOrder);
+router.get("/:account", userOrderController.getOrders);
+router.post("/:account/placed-order", userOrderController.placedOrder);
+router.get("/:orderId/order-with-items", userOrderController.getOrder);
+router.patch("/:orderId/canceled-order", userOrderController.cancleOrder);
 module.exports = router;

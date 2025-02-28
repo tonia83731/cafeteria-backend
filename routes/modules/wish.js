@@ -1,13 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const wishController = require("../../controllers/users/wish-controller");
+const userWishedController = require("../../controllers/user-wish-controller");
 
-router.post("/:userId/:productId/add", wishController.addProductToWish);
+router.post("/:account/:productId/add", userWishedController.addProductToWish);
 router.delete(
-  "/:userId/:productId/remove",
-  wishController.removeProductFromWish
+  "/:account/:productId/remove",
+  userWishedController.removeProductFromWish
 );
-router.get("/:userId/products", wishController.getWishes);
-router.get("/:userId/all-products", wishController.getWishWithProducts);
 
 module.exports = router;

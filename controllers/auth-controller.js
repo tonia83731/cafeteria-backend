@@ -1,5 +1,4 @@
 const { User, Cart } = require("../models");
-const passport = require("../config/passport");
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
 const jwt = require("jsonwebtoken");

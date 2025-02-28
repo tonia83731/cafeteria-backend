@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
-const discountController = require("../../controllers/users/discount-controller");
+const userDiscountController = require("../../controllers/user-discount-controller");
 
-router.get("/:userId", discountController.getDiscounts);
-router.get("/:userId/:discountId", discountController.getDiscount);
-router.post("/checked", discountController.checkedDiscount);
-
+router.get("/:account", userDiscountController.getUserCoupons);
+router.post(
+  "/:account/checked-discount-validation",
+  userDiscountController.checkedDiscountValidation
+);
 module.exports = router;

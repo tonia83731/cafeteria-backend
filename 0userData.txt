@@ -60,15 +60,3 @@
         "confirmPassword": "James#2024@"
     }
 ]
-
-測試用卡號: 2234567789812353 11/30
-測試用卡號: 2234546786823530 12/31
-測試用卡號 4242424242424242 05/31
-
-
-  // 儲存時需驗證載具 電子發票 API申請
-  // https://ithelp.ithome.com.tw/articles/10195024
-  // https://ithelp.ithome.com.tw/articles/10195281
-  // https://ithelp.ithome.com.tw/articles/10195561
-  // https://www.einvoice.nat.gov.tw/static/ptl/ein_upload/attachments/1693297176294_0.pdf
-  // https://api.einvoice.nat.gov.tw/

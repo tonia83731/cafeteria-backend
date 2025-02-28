@@ -4,34 +4,46 @@ const upload = require("../../middleware/multer");
 const adminProductController = require("../../controllers/admin/product-controller");
 const adminCouponController = require("../../controllers/admin/coupon-controller");
 const adminOrderController = require("../../controllers/admin/order-controller");
+
 router.get("/products/:productId", adminProductController.getProduct);
 router.put(
-  "/products/:productId",
+  "/products/:productId/updated",
   upload.single("file"),
   adminProductController.updateProduct
 );
-router.delete("/products/:productId", adminProductController.deleteProduct);
-router.get("/products?:categoryId", adminProductController.getProducts);
-router.post(
-  "/products",
-  upload.single("file"),
-  adminProductController.addProduct
+router.patch(
+  "/products/:productId/published",
+  adminProductController.publishedProduct
 );
+router.delete(
+  "/products/:productId/deleted",
+  adminProductController.deleteProduct
+);
+
 router.get("/coupons/:couponId", adminCouponController.getCoupon);
 router.put(
   "/coupons/:couponId/published",
   adminCouponController.publishedCoupon
 );
-router.put("/coupons/:couponId", adminCouponController.editCoupon);
-router.delete("/coupons/:couponId", adminCouponController.deleteCoupon);
-router.get("/coupons", adminCouponController.getCoupons);
-router.post("/coupons", adminCouponController.addCoupon);
-// router.get("/orders/:orderId", adminOrderController.getOrder);
-router.put("/orders/:orderId", adminOrderController.updateOrderStatus);
-router.get("/orders", adminOrderController.getOrders);
+router.put("/coupons/:couponId/updated", adminCouponController.editCoupon);
+router.delete("/coupons/:couponId/deleted", adminCouponController.deleteCoupon);
+
+router.patch(
+  "/orders/:orderId/updated-status",
+  adminOrderController.updateOrderStatus
+);
+
 router.get("/categories", adminProductController.getCategories);
-router.get("/sizes", adminProductController.getSizes);
-router.get("/ices", adminProductController.getIces);
-router.get("/sugars", adminProductController.getSugars);
+router.get("/products", adminProductController.getProducts);
+router.post(
+  "/products/add",
+  upload.single("file"),
+  adminProductController.addProduct
+);
+
+router.get("/coupons", adminCouponController.getCoupons);
+router.post("/coupons/add", adminCouponController.addCoupon);
+
+router.get("/orders", adminOrderController.getOrders);
 
 module.exports = router;

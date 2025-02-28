@@ -1,18 +1,21 @@
 const { User, Coupon, Discount } = require("../../models");
-const { Op } = require("sequelize");
 const adminCouponController = {
   // -------------------- coupon --------------------
   getCoupons: async (req, res, next) => {
     try {
       const coupons = await Coupon.findAll({
         raw: true,
+        order: [
+          ["isPublished", "DESC"],
+          ["endDate", "ASC"],
+        ],
       });
       return res.status(200).json({
         success: true,
         data: coupons,
       });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   },
   getCoupon: async (req, res, next) => {
@@ -32,40 +35,27 @@ const adminCouponController = {
         data: coupon,
       });
     } catch (error) {
-      console.log(error);
-      next();
+      next(error);
     }
   },
   addCoupon: async (req, res, next) => {
     try {
       const {
-        title_zh,
+        title,
         title_en,
-        description_zh,
+        description,
         description_en,
         code,
-        startDate,
         endDate,
         discountType,
         discountValue,
-        categoryId,
-        minSpend,
       } = req.body;
 
-      if (!title_zh || !title_en)
+      if (!title || !title_en)
         return res.status(400).json({
           success: false,
           message: "Title cannot be blank",
         });
-
-      const title = {
-        zh: title_zh,
-        en: title_en,
-      };
-      const description = {
-        zh: description_zh,
-        en: description_en,
-      };
 
       if (code.length < 6 || code.length > 18)
         return res.status(400).json({
@@ -73,48 +63,30 @@ const adminCouponController = {
           message: "Code should between 6-18 letters",
         });
 
-      if (
-        discountType === "percent" &&
-        (discountValue < 0 || discountValue > 100)
-      )
+      let currDate = Date.now();
+      if (endDate <= currDate)
         return res.status(400).json({
           success: false,
-          message:
-            "DiscountType: percent, discountValue cannot lower 0 and higher 100",
-        });
-      if (discountType === "price" && discountValue < 0)
-        return res.status(400).json({
-          success: false,
-          message: "DiscountType: price, discountValue cannot lower 0",
+          message: "End date cannot be earlier than the current date.",
         });
 
-      let start_date = new Date(startDate);
-      let end_date = new Date(endDate);
-      if (start_date > end_date)
-        return res.status(400).json({
-          success: false,
-          message: "StartDate cannot exceed endDate",
-        });
-
-      let new_coupon = await Coupon.create({
+      let newCoupon = await Coupon.create({
         title,
+        title_en,
         description,
+        description_en,
         code,
-        startDate,
         endDate,
         discountType,
         discountValue,
-        categoryId: categoryId ? categoryId : null,
-        minSpend: minSpend ? minSpend : 0,
       });
 
       return res.status(201).json({
         success: true,
-        message: "Coupon created",
-        data: new_coupon,
+        data: newCoupon,
       });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   },
   // add to discount
@@ -151,12 +123,12 @@ const adminCouponController = {
 
       await Promise.all(add_user_discounts);
 
-      return res.status(201).json({
+      return res.status(200).json({
         success: true,
         message: "Coupon is published. Add coupons to discounts.",
       });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   },
   // cannot edit after published
@@ -165,18 +137,16 @@ const adminCouponController = {
     try {
       const { couponId } = req.params;
       const {
-        title_zh,
+        title,
         title_en,
-        description_zh,
+        description,
         description_en,
         code,
-        startDate,
         endDate,
         discountType,
         discountValue,
-        categoryId,
-        minSpend,
       } = req.body;
+
       const coupon = await Coupon.findByPk(couponId);
       if (!coupon)
         return res.status(404).json({
@@ -189,7 +159,7 @@ const adminCouponController = {
           success: false,
           message: "Coupon cannot edit after published",
         });
-      if (!title_zh || !title_en)
+      if (!title || !title_en)
         return res.status(400).json({
           success: false,
           message: "Title cannot be blank",
@@ -201,61 +171,31 @@ const adminCouponController = {
           message: "Code should between 6-18 letters",
         });
 
-      if (
-        discountType === "percent" &&
-        (discountValue < 0 || discountValue > 100)
-      )
+      let currDate = Date.now();
+
+      if (currDate >= endDate)
         return res.status(400).json({
           success: false,
-          message:
-            "DiscountType: percent, discountValue cannot lower 0 and higher 100",
-        });
-      if (discountType === "price" && discountValue < 0)
-        return res.status(400).json({
-          success: false,
-          message: "DiscountType: price, discountValue cannot lower 0",
+          message: "End date cannot be earlier than the current date.",
         });
 
-      let start_date = new Date(startDate);
-      let end_date = new Date(endDate);
-      if (isNaN(start_date) || isNaN(end_date))
-        return res.status(400).json({
-          success: false,
-          message: "Invalid startDate or endDate.",
-        });
-
-      if (start_date > end_date)
-        return res.status(400).json({
-          success: false,
-          message: "Start date cannot be later than end date.",
-        });
-
-      const title = {
-        zh: title_zh,
-        en: title_en,
-      };
-      const description = {
-        zh: description_zh,
-        en: description_en,
-      };
       const update_coupon = await coupon.update({
         title,
+        title_en,
         description,
+        description_en,
         code,
-        startDate,
         endDate,
         discountType,
         discountValue,
-        categoryId: categoryId ? categoryId : coupon.categoryId,
-        minSpend: minSpend ? minSpend : coupon.minSpend,
+        isPublished: false,
       });
       return res.status(200).json({
         success: true,
-        message: "Coupon updated successfully.",
         data: update_coupon,
       });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   },
   // delete coupon and discounts
@@ -280,7 +220,7 @@ const adminCouponController = {
         message: "Coupon and relative discounts are deleted",
       });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   },
 };

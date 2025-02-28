@@ -1,5 +1,4 @@
 const { Product, Category } = require("../../models");
-// const { imageFileHanlder } = require("../../helpers/file-helpers");
 const { imgurFileHandler } = require("../../helpers/file-helpers");
 
 const adminProductController = {
@@ -14,7 +13,7 @@ const adminProductController = {
         data: categories,
       });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   },
   // -------------------- product (edit) --------------------
@@ -41,7 +40,7 @@ const adminProductController = {
         data: productData,
       });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   },
   getProduct: async (req, res, next) => {
@@ -58,77 +57,47 @@ const adminProductController = {
           message: "Product does not exist",
         });
 
-      let categoryId = product.categoryId;
       let productData = {
         ...product,
         categoryCode: product.Category.code,
         Category: undefined,
       };
 
-      const [sizeOptions, iceOptions, sugarOptions] = await Promise.all([
-        Size.findAll({
-          raw: true,
-        }),
-        Ice.findAll({
-          raw: true,
-        }),
-        Sugar.findAll({
-          raw: true,
-        }),
-      ]);
-
-      if (categoryId === 3 || categoryId === 4) {
-        productData.sizeOptions = sizeOptions;
-        productData.iceOptions = iceOptions;
-        productData.sugarOptions = sugarOptions;
-      } else if (categoryId === 5) {
-        productData.sizeOptions = sizeOptions;
-      }
       return res.status(200).json({
         success: true,
         data: productData,
       });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   },
   addProduct: async (req, res, next) => {
     try {
       const {
-        title_zh,
+        title,
         title_en,
-        description_zh,
+        description,
         description_en,
         price,
         categoryId,
       } = req.body;
       const { file } = req;
       const filePath = await imgurFileHandler(file);
-      // console.log(filePath);
       const category = await Category.findByPk(categoryId, {
         raw: true,
       });
 
-      if (!title_zh || !title_en)
+      if (!title || !title_en)
         return res.status(400).json({
           success: false,
           message: "Title cannot be blank",
         });
 
-      if (description_zh.length > 150 || description_en.length > 150)
+      if (description.length > 150 || description_en.length > 150)
         return es.status(400).json({
           success: false,
           message: "Description cannot exceed 150 letters",
         });
-
-      const title = {
-        zh: title_zh,
-        en: title_en,
-      };
-      const description = {
-        zh: description_zh,
-        en: description_en,
-      };
 
       if (!price)
         return res.status(400).json({
@@ -138,9 +107,11 @@ const adminProductController = {
 
       const new_product = await Product.create({
         title,
+        title_en,
         description,
-        price: Number(price),
-        categoryId: Number(categoryId),
+        description_en,
+        price,
+        categoryId,
         image: filePath || null,
       });
 
@@ -151,33 +122,28 @@ const adminProductController = {
 
       return res.status(201).json({
         success: true,
-        message: "Product created",
         data: newProduct,
       });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   },
   updateProduct: async (req, res, next) => {
     try {
       const { productId } = req.params;
       const {
-        title_zh,
+        title,
         title_en,
-        description_zh,
+        description,
         description_en,
         price,
         categoryId,
       } = req.body;
       const { file } = req;
-      // console.log(req.body);
-      // const product = await Product.findByPk(productId);
 
       const [product, category] = await Promise.all([
         Product.findByPk(productId),
-        Category.findByPk(categoryId, {
-          raw: true,
-        }),
+        Category.findByPk(categoryId),
       ]);
       if (!product)
         return res.status(404).json({
@@ -186,23 +152,16 @@ const adminProductController = {
         });
 
       const filePath = file ? await imgurFileHandler(file) : product.image;
-      // console.log(file);
-      // console.log(filePath);
-      const title = {
-        zh: title_zh || product.title.zh,
-        en: title_en || product.title.en,
-      };
-      const description = {
-        zh: description_zh || product.description.zh,
-        en: description_en || product.description.en,
-      };
 
       const update_product = await product.update({
         title,
+        title_en,
         description,
-        price: Number(price) || product.price,
-        categoryId: Number(categoryId) || product.categoryId,
+        description_en,
+        price: price || product.price,
+        categoryId: categoryId || product.categoryId,
         image: filePath,
+        isPublished: product.isPublished,
       });
 
       const updatedProduct = {
@@ -212,11 +171,32 @@ const adminProductController = {
 
       return res.status(201).json({
         success: true,
-        message: "Product updated",
         data: updatedProduct,
       });
     } catch (error) {
-      console.log(error);
+      next(error);
+    }
+  },
+  publishedProduct: async (req, res, next) => {
+    try {
+      const { productId } = req.params;
+      const product = await Product.findByPk(productId);
+
+      if (!product)
+        return res.status(404).json({
+          success: false,
+          message: "Product no found.",
+        });
+
+      product.isPublished = !product.isPublished;
+      await product.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Product published status updated successfully.",
+      });
+    } catch (error) {
+      next(error);
     }
   },
   deleteProduct: async (req, res, next) => {
@@ -229,6 +209,12 @@ const adminProductController = {
           message: "Product no found.",
         });
 
+      if (product.isPublished)
+        return res.status(400).json({
+          success: false,
+          message: "Product isPublished. Product cannot deleted.",
+        });
+
       await product.destroy();
 
       return res.status(200).json({
@@ -236,7 +222,7 @@ const adminProductController = {
         message: "Product delete",
       });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   },
 };

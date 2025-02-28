@@ -1,15 +1,21 @@
 const express = require("express");
 const router = express.Router();
 
-const cartController = require("../../controllers/users/cart-controller");
+const userCartController = require("../../controllers/user-cart-controllers");
 
-router.patch("/:userId/:cartItemId/custom", cartController.updateCartItem);
 router.patch(
-  "/:userId/:cartItemId/quantity",
-  cartController.updatedCartItemQuantity
+  "/:account/:cartItemId/updated-cart-item",
+  userCartController.updatedCartItem
 );
-router.delete("/:userId/:cartItemId", cartController.deleteCartItem);
-router.get("/:userId", cartController.getCart);
-router.post("/:userId/add-cart", cartController.addCartItem);
+router.patch(
+  "/:account/:cartItemId/updated-cart-item-quantity",
+  userCartController.updatedCartItem
+);
+router.delete(
+  "/:account/:cartItemId/delete-cart-item",
+  userCartController.deleteCartItem
+);
+router.get("/:account/cart-and-cart-item", userCartController.getCartWithItems);
+router.post("/:account/add-cart-item", userCartController.addCartItem);
 
 module.exports = router;
