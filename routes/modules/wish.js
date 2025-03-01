@@ -7,5 +7,6 @@ router.delete(
   "/:account/:productId/remove",
   userWishedController.removeProductFromWish
 );
+router.get("/:account/products", userWishedController.getWishProducts);
 
 module.exports = router;

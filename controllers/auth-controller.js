@@ -76,7 +76,6 @@ const authController = {
 
       return res.status(201).json({
         success: true,
-        message: "User and user cart created.",
         data: {
           user,
           cart,
@@ -100,13 +99,13 @@ const authController = {
       });
 
       if (!user || user.isAdmin)
-        return res.status(404).json({
+        return res.status(401).json({
           success: false,
-          message: "User does not exist",
+          message: "Email or password incorret",
         });
 
       if (!bcrypt.compareSync(password, user.password))
-        return res.status(400).json({
+        return res.status(401).json({
           success: false,
           message: "Email or password incorret",
         });
@@ -146,12 +145,12 @@ const authController = {
         });
       const user = await User.findOne({ where: { email } });
       if (!user || !user.isAdmin)
-        return res.status(404).json({
+        return res.status(401).json({
           success: false,
-          message: "User does not exist",
+          message: "Email or password incorrect",
         });
       if (!bcrypt.compareSync(password, user.password))
-        return res.status(400).json({
+        return res.status(401).json({
           success: false,
           message: "Email or password incorrect",
         });

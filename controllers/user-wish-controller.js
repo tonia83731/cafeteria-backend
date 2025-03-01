@@ -24,7 +24,7 @@ const userWishedController = {
           message: "Product no found.",
         });
 
-      const [_, created] = await Wish.fondOrCreate({
+      const [_, created] = await Wish.findOrCreate({
         where: {
           userId: user.id,
           productId,
@@ -74,6 +74,30 @@ const userWishedController = {
       return res.status(200).json({
         success: true,
         message: "Product removed from wish.",
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  },
+  getWishProducts: async (req, res, next) => {
+    try {
+      const { account } = req.params;
+      const user = await User.findOne({
+        where: {
+          account,
+        },
+        include: [{ model: Product, as: "WishedProducts" }],
+      });
+
+      if (!user)
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+
+      return res.status(200).json({
+        success: true,
+        data: user.WishedProducts,
       });
     } catch (error) {
       console.log(error);

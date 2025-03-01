@@ -32,8 +32,6 @@ const userController = {
   },
   getUser: async (req, res, next) => {
     try {
-      const id = req.user.id;
-
       const { account } = req.params;
       const user = await User.findOne({
         where: { account },
@@ -44,15 +42,6 @@ const userController = {
           success: false,
           message: "User does not exist",
         });
-
-      // const userId = user.id;
-
-      // if (id !== userId) {
-      //   return res.status(400).json({
-      //     success: false,
-      //     message: "Permission denied!",
-      //   });
-      // }
 
       let userData = user.toJSON();
 

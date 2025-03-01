@@ -17,7 +17,9 @@ const userDiscountController = {
         ],
       });
 
-      if (!user || user.Discounts.length === 0)
+      console.log();
+
+      if (!user || !user?.Discounts)
         return res.status(404).json({
           success: false,
           message: "User not found.",
@@ -25,7 +27,7 @@ const userDiscountController = {
 
       return res.status(200).json({
         success: true,
-        data: user.Discount,
+        data: user.Discounts,
       });
     } catch (error) {
       next(error);

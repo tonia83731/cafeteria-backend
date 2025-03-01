@@ -3,8 +3,10 @@ module.exports = (sequelize, DataTypes) => {
   const Coupon = sequelize.define(
     "Coupon",
     {
-      title: DataTypes.JSON,
-      description: DataTypes.JSON,
+      title: DataTypes.STRING,
+      title_en: DataTypes.STRING,
+      description: DataTypes.STRING,
+      description_en: DataTypes.STRING,
       code: DataTypes.STRING,
       endDate: DataTypes.INTEGER,
       discountType: DataTypes.STRING,

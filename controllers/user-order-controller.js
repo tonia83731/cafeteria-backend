@@ -8,27 +8,27 @@ const {
   Order,
   OrderItem,
 } = require("../models");
+const { Op } = require("sequelize");
 
 const userOrderController = {
   getOrders: async (req, res, next) => {
     try {
       const { account } = req.params;
+      const { status } = req.query;
+
+      let condition = {};
+      if (status) {
+        if (status === "ongoing") {
+          condition.status = { [Op.in]: [0, 1, 2] };
+        } else if (status === "completed") {
+          condition.status = 3;
+        } else if (status === "canceled") {
+          condition.status = 4;
+        }
+      }
 
       const user = await User.findOne({
         where: { account },
-        nest: true,
-        include: [
-          {
-            model: Order,
-            include: [
-              {
-                model: Discount,
-                include: [Coupon],
-              },
-              OrderItem,
-            ],
-          },
-        ],
       });
 
       if (!user)
@@ -37,9 +37,47 @@ const userOrderController = {
           message: "User no found.",
         });
 
+      const orders = await Order.findAll({
+        where: {
+          userId: user.id,
+          ...(condition ? condition : {}),
+        },
+        order: [
+          ["status", "ASC"],
+          ["updatedAt", "DESC"],
+        ],
+        include: [
+          {
+            model: Discount,
+            include: [
+              {
+                model: Coupon,
+                attributes: ["code", "discountType", "discountValue"],
+              },
+            ],
+          },
+        ],
+      });
+
+      const orderDatas = orders.map((order) => {
+        let orderData = order.toJSON();
+        return {
+          ...orderData,
+          discount: order.Discount
+            ? {
+                id: orderData.Discount.id,
+                code: orderData.Discount.Coupon.code,
+                discountType: orderData.Discount.Coupon.discountType,
+                discountValue: orderData.Discount.Coupon.discountValue,
+              }
+            : null,
+          Discount: undefined,
+        };
+      });
+
       res.status(200).json({
         success: true,
-        data: user.Order,
+        data: orderDatas,
       });
     } catch (error) {
       console.log(error);
@@ -48,22 +86,25 @@ const userOrderController = {
   getOrder: async (req, res, next) => {
     try {
       const { orderId } = req.params;
-      const order = await Order.findByPk(orderId, {
-        next: true,
+
+      const orderitems = await OrderItem.findAll({
+        where: {
+          orderId,
+        },
         include: [
-          Discount,
           {
-            model: OrderItem,
-            include: [Product],
+            model: Product,
+            attributes: ["title", "title_en", "price"],
           },
         ],
       });
+
       return res.status(200).json({
         success: true,
-        data: order,
+        data: orderitems,
       });
     } catch (error) {
-      console.log(error);
+      next(error);
     }
   },
   cancleOrder: async (req, res, next) => {

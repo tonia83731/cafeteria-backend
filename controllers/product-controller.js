@@ -23,6 +23,7 @@ const productController = {
       let products = response.rows.map((product) => {
         return {
           ...product,
+          isWished: null,
           categoryCode: product.Category.code,
           Category: undefined,
         };
@@ -51,9 +52,9 @@ const productController = {
       const product = await Product.findByPk(productId, {
         raw: true,
         nest: true,
-        where: {
-          isPublished: true,
-        },
+        // where: {
+        //   isPublished: true,
+        // },
         include: [Category],
       });
       if (!product)
@@ -112,7 +113,7 @@ const productController = {
         nest: true,
         include: [Category],
         where: {
-          isPublished: true,
+          // isPublished: true,
           ...(categoryId ? { categoryId } : {}),
         },
         limit,
