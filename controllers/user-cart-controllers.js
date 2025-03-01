@@ -1,10 +1,10 @@
-const { User, Product, Cart, CartItem } = require("../models");
+const { User, Product, Cart, CartItem, Category } = require("../models");
 
 const userCartController = {
   getCartWithItems: async (req, res, next) => {
     try {
       const { account } = req.params;
-      const user = await User.findOne({
+      const data = await User.findOne({
         where: { account },
         nest: true,
         include: [
@@ -13,27 +13,45 @@ const userCartController = {
             include: [
               {
                 model: CartItem,
-                include: [Product],
+                include: [
+                  {
+                    model: Product,
+                    attributes: ["title", "title_en", "price"],
+                    include: [
+                      {
+                        model: Category,
+                        attributes: ["hasOpts"],
+                      },
+                    ],
+                  },
+                ],
+                attributes: ["id", "quantity", "size", "ice", "sugar", "price"],
               },
             ],
+            attributes: ["id", "userId"],
           },
         ],
+        attributes: ["name", "email", "account", "phone", "address", "invoice"],
       });
 
-      if (!user)
+      if (!data || !data?.Cart)
         return res.status(404).json({
           success: false,
-          message: "User not found",
+          message: "Cart not found",
         });
-      if (!user.Cart)
-        return res.status(404).json({
-          success: false,
-          message: "User cart not found",
-        });
+
+      const user = {
+        ...data.toJSON(),
+        Cart: undefined,
+      };
+      const cart = data.Cart;
 
       return res.status(200).json({
         success: true,
-        data: user.Cart,
+        data: {
+          user,
+          cart,
+        },
       });
     } catch (error) {
       next(error);
