@@ -52,9 +52,6 @@ const productController = {
       const product = await Product.findByPk(productId, {
         raw: true,
         nest: true,
-        // where: {
-        //   isPublished: true,
-        // },
         include: [Category],
       });
       if (!product)

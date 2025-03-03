@@ -60,7 +60,6 @@ const commentController = {
       return res.status(201).json({
         success: true,
         message: "Comment created!",
-        // data: new_comment,
       });
     } catch (error) {
       console.log(error);
