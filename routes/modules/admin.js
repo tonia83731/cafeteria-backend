@@ -21,7 +21,7 @@ router.delete(
 );
 
 router.get("/coupons/:couponId", adminCouponController.getCoupon);
-router.put(
+router.patch(
   "/coupons/:couponId/published",
   adminCouponController.publishedCoupon
 );

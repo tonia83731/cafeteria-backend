@@ -38,33 +38,57 @@ const userDiscountController = {
       const { account } = req.params;
       const { code } = req.body;
 
-      const user = await User.findOne({
-        where: { account },
-        include: [
-          {
-            model: Discount,
-            where: { isApplied: false },
-            include: [
-              {
-                model: Coupon,
-                where: {
-                  code,
-                },
-              },
-            ],
+      const [user, coupon] = await Promise.all([
+        User.findOne({
+          where: { account },
+        }),
+        Coupon.findOne({
+          where: {
+            code,
           },
-        ],
-      });
+        }),
+      ]);
 
-      if (!user)
+      if (!user || !coupon)
         return res.status(200).json({
           success: true,
-          data: false,
+          data: {
+            status: false,
+            coupon: null,
+          },
         });
+
+      const discount = await Discount.findOne({
+        where: {
+          couponId: coupon.id,
+          userId: user.id,
+        },
+      });
+
+      if (!discount || discount.isApplied)
+        return res.status(200).json({
+          success: true,
+          data: {
+            status: false,
+            coupon: null,
+          },
+        });
+
+      const couponJSON = coupon.toJSON();
+
+      const data = {
+        discountId: discount.id,
+        code: couponJSON.code,
+        discountType: couponJSON.discountType,
+        discountValue: couponJSON.discountValue,
+      };
 
       return res.status(200).json({
         success: true,
-        data: true,
+        data: {
+          status: true,
+          coupon: data,
+        },
       });
     } catch (error) {
       next(error);

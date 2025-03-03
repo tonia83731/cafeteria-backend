@@ -31,7 +31,7 @@ const adminOrderController = {
             include: [
               {
                 model: Product,
-                attributes: ["title", "titleEn", "price"],
+                attributes: ["title", "title_en", "price"],
               },
             ],
           },

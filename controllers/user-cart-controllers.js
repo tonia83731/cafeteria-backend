@@ -90,7 +90,7 @@ const userCartController = {
       let calcPrice = 0;
 
       if (product.categoryId === 3 || product.categoryId === 4) {
-        if (!size || !ice || !sugar)
+        if (size === null || ice === null || sugar === null)
           return res.status(400).json({
             success: false,
             message: "Size, ice, sugar is required!",
@@ -187,18 +187,18 @@ const userCartController = {
 
       let updatedPrice = productPrice * currCartItemQty;
 
-      if (size && currCartItemSize !== size) {
+      if (size !== undefined && currCartItemSize !== size) {
         // need to updated price
         const calcSizePrice = size === 1 ? 10 : size === 2 ? 15 : 0;
         updatedPrice = (productPrice + calcSizePrice) * currCartItemQty;
         cartItem.size = size;
       }
 
-      if (ice && currCartItemIce !== ice) {
+      if (ice !== undefined && currCartItemIce !== ice) {
         cartItem.ice = ice;
       }
 
-      if (sugar && currCartItemSugar !== sugar) {
+      if (sugar !== undefined && currCartItemSugar !== sugar) {
         cartItem.sugar = sugar;
       }
 

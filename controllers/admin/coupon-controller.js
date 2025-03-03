@@ -64,7 +64,7 @@ const adminCouponController = {
         });
 
       let currDate = Date.now();
-      if (endDate <= currDate)
+      if (endDate < currDate / 1000)
         return res.status(400).json({
           success: false,
           message: "End date cannot be earlier than the current date.",
@@ -173,7 +173,7 @@ const adminCouponController = {
 
       let currDate = Date.now();
 
-      if (currDate >= endDate)
+      if (currDate / 1000 >= endDate)
         return res.status(400).json({
           success: false,
           message: "End date cannot be earlier than the current date.",

@@ -140,14 +140,17 @@ const userOrderController = {
         shipping,
         payment,
         discountId,
+        discountPrice,
+        tax,
+        productPrice,
       } = req.body;
 
       if (
         !recipientName ||
         !recipientPhone ||
         !recipientAddress ||
-        !shipping ||
-        !payment
+        shipping === undefined ||
+        payment === undefined
       )
         return res.status(400).json({
           success: false,
@@ -171,34 +174,14 @@ const userOrderController = {
           message: "Cart no found",
         });
 
-      if (user.Cart.CartItem.length === 0)
+      if (user.Cart.CartItems.length === 0)
         return res.status(200).json({
           success: false,
           message: "Cart no items",
         });
 
       const cartId = user.Cart.id;
-      const cartitems = user.Cart.CartItem;
-      let total = cartitems.reduce((acc, curr) => (acc += curr.price), 0);
-
-      if (discountId) {
-        const res = Discount.findByPk(discountId, {
-          include: [{ model: Coupon }],
-        });
-
-        if (res) {
-          const discountType = res.Coupon.discountType;
-          const discountVal = res.Coupon.discountValue;
-
-          if (discountType === 0) {
-            total = total * ((100 - discountVal) / 100);
-          } else {
-            total -= discountVal;
-          }
-        }
-        res.isApplied = true;
-        await res.save();
-      }
+      const cartitems = user.Cart.CartItems;
 
       const order = await Order.create({
         userId: user.id,
@@ -208,11 +191,14 @@ const userOrderController = {
         shipping,
         payment,
         discountId,
-        total,
+        discountPrice,
+        tax,
+        productPrice,
+        total: productPrice + tax - discountPrice,
       });
 
-      const orderItems = cartitems.map(
-        ({ productId, quantity, size, ice, sugar, price }) =>
+      await Promise.all(
+        cartitems.map(({ productId, quantity, size, ice, sugar, price }) =>
           OrderItem.create({
             orderId: order.id,
             productId,
@@ -222,8 +208,8 @@ const userOrderController = {
             sugar,
             price,
           })
+        )
       );
-      await Promise.all(orderItems);
 
       await CartItem.destroy({
         where: {

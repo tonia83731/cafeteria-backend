@@ -9,7 +9,7 @@ router.patch(
 );
 router.patch(
   "/:account/:cartItemId/updated-cart-item-quantity",
-  userCartController.updatedCartItem
+  userCartController.updatedCartItemQty
 );
 router.delete(
   "/:account/:cartItemId/delete-cart-item",
