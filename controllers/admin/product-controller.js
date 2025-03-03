@@ -54,7 +54,7 @@ const adminProductController = {
       if (!product)
         return res.json(404).json({
           success: false,
-          message: "Product does not exist",
+          message: "Product not found.",
         });
 
       let productData = {
@@ -93,10 +93,10 @@ const adminProductController = {
           message: "Title cannot be blank",
         });
 
-      if (description.length > 150 || description_en.length > 150)
+      if (description.length > 300 || description_en.length > 300)
         return es.status(400).json({
           success: false,
-          message: "Description cannot exceed 150 letters",
+          message: "Description cannot exceed 300 letters",
         });
 
       if (!price)
@@ -219,7 +219,7 @@ const adminProductController = {
 
       return res.status(200).json({
         success: true,
-        message: "Product delete",
+        message: "Product deleted successfully.",
       });
     } catch (error) {
       next(error);

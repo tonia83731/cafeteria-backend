@@ -97,7 +97,7 @@ const adminCouponController = {
       if (!coupon)
         return res.status(404).json({
           success: false,
-          message: "Coupon no found.",
+          message: "Coupon not found.",
         });
 
       if (coupon.isPublished)

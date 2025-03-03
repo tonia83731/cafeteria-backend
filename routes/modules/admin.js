@@ -19,13 +19,16 @@ router.delete(
   "/products/:productId/deleted",
   adminProductController.deleteProduct
 );
-
+// V
 router.get("/coupons/:couponId", adminCouponController.getCoupon);
+// V
 router.patch(
   "/coupons/:couponId/published",
   adminCouponController.publishedCoupon
 );
+// V
 router.put("/coupons/:couponId/updated", adminCouponController.editCoupon);
+// V
 router.delete("/coupons/:couponId/deleted", adminCouponController.deleteCoupon);
 
 router.patch(
