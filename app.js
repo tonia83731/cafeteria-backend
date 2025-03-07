@@ -13,6 +13,23 @@ const { getUser } = require("./helpers/_helpers");
 const app = express();
 const port = process.env.PORT || 8080;
 
+const allowedOrigins = [
+  "http://localhost:5173", // Development
+  "https://cafeteria-frontend-staff.vercel.app/", // Production
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200,
+};
+
 app.use("/upload", express.static(path.join(__dirname, "upload")));
 
 app.use(express.json());
