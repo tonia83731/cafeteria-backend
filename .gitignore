@@ -4,5 +4,3 @@ upload/
 
 .DS_Store
 .env
-
-config/config.json

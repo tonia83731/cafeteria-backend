@@ -6,28 +6,22 @@ const Sequelize = require("sequelize");
 const basename = path.basename(__filename);
 const env =
   process.env.NODE_ENV === "development" ? "development" : "production";
-// const config = require(__dirname + "/../config/config.json")[env];
-const config = require("../config/config")[env];
-// console.log(typeof env, config.production);
-// console.log(config[env]);
-const db = {};
+const config = require(__dirname + "/../config/config.json")[env];
 
-let sequelize = new Sequelize(
-  config.database,
-  config.username,
-  config.password,
-  config
-);
-// if (config.use_env_variable) {
-//   sequelize = new Sequelize(process.env[config.use_env_variable], config);
-// } else {
-//   sequelize = new Sequelize(
-//     config.database,
-//     config.username,
-//     config.password,
-//     config
-//   );
-// }
+const db = {};
+let sequelize;
+
+if (config.use_env_variable) {
+  // console.log(process.env[config.use_env_variable]);
+  sequelize = new Sequelize(process.env[config.use_env_variable], config);
+} else {
+  sequelize = new Sequelize(
+    config.database,
+    config.username,
+    config.password,
+    config
+  );
+}
 
 fs.readdirSync(__dirname)
   .filter((file) => {
