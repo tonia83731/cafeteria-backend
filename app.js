@@ -16,6 +16,7 @@ const port = process.env.PORT || 8080;
 const allowedOrigins = [
   "http://localhost:5173", // Development
   "https://cafeteria-frontend-staff.vercel.app/", // Production
+  "https://cafeteria-frontend-chi.vercel.app/",
 ];
 
 const corsOptions = {
