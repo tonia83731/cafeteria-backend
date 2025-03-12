@@ -9,6 +9,8 @@ const imgurFileHandler = (file) => {
   return new Promise((resolve, reject) => {
     if (!file) return resolve(null);
 
+    console.log(file.path);
+
     imgur
       .uploadFile(file.path)
       .then((img) => {
