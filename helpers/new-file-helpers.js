@@ -1,4 +1,5 @@
 const { ImgurClient } = require("imgur");
+const fs = require("fs");
 const client = new ImgurClient({
   clientId: process.env.IMGUR_CLIENT_ID,
   clientSecret: process.env.IMGUR_CLIENT_SECRET,
@@ -10,13 +11,11 @@ const imgurFileHandler = async (file) => {
 
   try {
     const response = await client.upload({
-      image: file.path, // Assuming 'file.path' is the URL or file path for the image
-      // title: "Meme", // You can set a dynamic title if needed
-      // description: "Dank Meme", // You can set a dynamic description if needed
+      image: fs.createReadStream(file.path),
     });
 
-    if (response && response.link) {
-      return response.link;
+    if (response && response.data.link) {
+      return response.data.link;
     } else {
       throw new Error("Image upload failed, no link received.");
     }
