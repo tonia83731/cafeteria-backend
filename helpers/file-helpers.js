@@ -9,6 +9,8 @@ const imgurFileHandler = (file) => {
 
     const base64 = file.buffer.toString("base64");
 
+    console.log(file, base64);
+
     imgur
       .uploadBase64(base64) // Upload the image directly from buffer
       .then((img) => {
