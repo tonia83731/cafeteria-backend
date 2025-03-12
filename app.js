@@ -14,9 +14,10 @@ const app = express();
 const port = process.env.PORT || 8080;
 
 const allowedOrigins = [
-  "http://localhost:5173", // Development
-  "https://cafeteria-frontend-staff.vercel.app/", // Production
-  "https://cafeteria-frontend-chi.vercel.app/",
+  "http://localhost:5173",
+  "http://localhost:3000", // Development
+  "https://cafeteria-staff-frontend.vercel.app", // Production
+  "https://cafeteria-frontend-chi.vercel.app",
 ];
 
 const corsOptions = {
