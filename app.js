@@ -18,6 +18,7 @@ const allowedOrigins = [
   "http://localhost:3000", // Development
   "https://cafeteria-staff-frontend.vercel.app", // Production
   "https://cafeteria-frontend-chi.vercel.app",
+  "https://api.imgur.com/3/image",
 ];
 
 const corsOptions = {
