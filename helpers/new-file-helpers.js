@@ -1,8 +1,8 @@
 const { ImgurClient } = require("imgur");
 const client = new ImgurClient({
-  clientId: process.env.CLIENT_ID,
-  clientSecret: process.env.CLIENT_SECRET,
-  refreshToken: process.env.REFRESH_TOKEN,
+  clientId: process.env.IMGUR_CLIENT_ID,
+  clientSecret: process.env.IMGUR_CLIENT_SECRET,
+  refreshToken: process.env.IMGUR_REFRESH_TOKEN,
 });
 
 const imgurFileHandler = async (file) => {
