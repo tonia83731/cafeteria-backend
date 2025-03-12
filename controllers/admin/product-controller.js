@@ -1,5 +1,6 @@
 const { Product, Category } = require("../../models");
-const { imgurFileHandler } = require("../../helpers/file-helpers");
+// const { imgurFileHandler } = require("../../helpers/file-helpers");
+const { imgurFileHandler } = require("../../helpers/new-file-helpers");
 
 const adminProductController = {
   // -------------------- category --------------------
