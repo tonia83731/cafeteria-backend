@@ -40,3 +40,6 @@ module.exports = {
   // localFileHandler,
   imgurFileHandler,
 };
+
+// https://israynotarray.com/nodejs/20220517/432259079/
+// v1.0.2

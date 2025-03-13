@@ -17,8 +17,6 @@ const userDiscountController = {
         ],
       });
 
-      console.log();
-
       if (!user || !user?.Discounts)
         return res.status(404).json({
           success: false,
