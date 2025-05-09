@@ -4,9 +4,9 @@ module.exports = (sequelize, DataTypes) => {
     "Product",
     {
       title: DataTypes.STRING,
-      title_en: DataTypes.STRING,
+      titleEn: DataTypes.STRING,
       description: DataTypes.STRING,
-      description_en: DataTypes.STRING,
+      descriptionEn: DataTypes.STRING,
       price: DataTypes.INTEGER,
       categoryId: DataTypes.INTEGER,
       image: DataTypes.STRING,
@@ -19,25 +19,31 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   Product.associate = function (models) {
+    // product ⇌ category
+    Product.belongsTo(models.Category, {
+      foreignKey: "categoryId",
+      as: "category",
+    });
+    // product ⇌ wish ⇌ user
     Product.belongsToMany(models.User, {
       through: models.Wish,
       foreignKey: "productId",
-      as: "WishedUsers",
+      otherKey: "userId",
+      as: "wishedUsers",
     });
-    Product.belongsToMany(models.Cart, {
-      through: models.CartItem,
+    // product ⇌ cart
+    Product.belongsToMany(models.User, {
+      through: models.Cart,
       foreignKey: "productId",
-      otherKey: "cartId",
-      as: "Carts",
+      otherKey: "userId",
+      as: "cartUsers",
     });
-    Product.belongsTo(models.Category, {
-      foreignKey: "categoryId",
-    });
+    // product ⇌ orderitem ⇌ order
     Product.belongsToMany(models.Order, {
       through: models.OrderItem,
       foreignKey: "productId",
       otherKey: "orderId",
-      as: "Orders",
+      as: "orders",
     });
   };
   return Product;

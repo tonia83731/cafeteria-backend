@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     "Category",
     {
       code: DataTypes.STRING,
-      hasOpts: DataTypes.BOOLEAN,
+      includeOption: DataTypes.BOOLEAN,
     },
     {
       modelName: "Category",
@@ -15,6 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   Category.associate = function (models) {
     Category.hasMany(models.Product, {
       foreignKey: "categoryId",
+      as: "products",
     });
   };
   return Category;

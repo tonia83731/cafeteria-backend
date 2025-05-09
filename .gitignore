@@ -4,5 +4,6 @@ upload/
 
 .DS_Store
 .env
-
-docs.txt
+.env*
+!.env.example
+*.txt

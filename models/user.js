@@ -20,19 +20,21 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   User.associate = function (models) {
-    User.hasMany(models.Discount, {
-      foreignKey: "userId",
-    });
     User.belongsToMany(models.Product, {
       through: models.Wish,
       foreignKey: "userId",
-      as: "WishedProducts",
-    });
-    User.hasOne(models.Cart, {
-      foreignKey: "userId",
+      otherKey: "productId",
+      as: "wishedProducts",
     });
     User.hasMany(models.Order, {
       foreignKey: "userId",
+      as: "orders",
+    });
+    User.belongsToMany(models.Product, {
+      through: models.Cart,
+      foreignKey: "userId",
+      otherKey: "productId",
+      as: "cartProducts",
     });
   };
   return User;
