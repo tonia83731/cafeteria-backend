@@ -1,31 +1,28 @@
-const { User, Cart } = require("../models");
+const { User } = require("../models");
 const bcrypt = require("bcryptjs");
-const validator = require("validator");
 const jwt = require("jsonwebtoken");
+const { validationResult } = require("express-validator");
+const {
+  register_validation,
+  login_validation,
+  admin_login_validation,
+} = require("../helpers/validation/auth-validation");
+const sendEmail = require("../helpers/mailer-helpers");
 
 const authController = {
-  // edit here
   register: async (req, res, next) => {
+    await Promise.all(
+      register_validation.map((validation) => validation.run(req))
+    );
+    const errs = validationResult(req);
+    if (!errs.isEmpty())
+      return res.status(400).json({
+        success: false,
+        message: errs.array(),
+      });
+
     try {
-      const { name, email, password, account } = req.body;
-
-      if (!name || !email || !password || !account)
-        return res.status(400).json({
-          success: false,
-          message: "Name, email, password, account are required.",
-        });
-
-      if (name.length > 50 || name.length < 3)
-        return res.status(400).json({
-          success: false,
-          message: "Name must between 3-50 letters.",
-        });
-
-      if (!validator.isEmail(email))
-        return res.status(400).json({
-          success: false,
-          message: "Invalid email.",
-        });
+      const { name, email, password, account, address, phone } = req.body;
 
       const existingEmail = await User.findOne({
         where: { email },
@@ -41,22 +38,6 @@ const authController = {
           message: "User already existed.",
         });
 
-      if (
-        !validator.isStrongPassword(password, {
-          minLength: 8,
-          minLowercase: 1,
-          minUppercase: 1,
-          minNumbers: 1,
-          minSymbols: 1,
-        })
-      ) {
-        return res.status(400).json({
-          success: false,
-          message:
-            "Required strong password (above 8 letters, 1 lowercase, 1 uppercase, 1 number and 1 symbol)",
-        });
-      }
-
       const hash = await bcrypt.hash(password, 10);
 
       let user = await User.create({
@@ -64,46 +45,50 @@ const authController = {
         email,
         account,
         password: hash,
+        address,
+        phone,
       });
 
       user = user.toJSON();
-
-      const cart = await Cart.create({
-        userId: user.id,
-      });
-
       delete user.password;
 
       return res.status(201).json({
         success: true,
-        data: {
-          user,
-          cart,
-        },
+        data: user,
       });
     } catch (error) {
       console.log(error);
+      return res.status(500).json({
+        success: false,
+        message: error,
+      });
     }
   },
   login: async (req, res, next) => {
-    try {
-      const { email, password } = req.body;
-      if (!email || !password)
-        return res.status(400).json({
-          success: false,
-          message: "Email, password cannot be blank",
-        });
-
-      const user = await User.findOne({
-        where: { email },
+    await Promise.all(
+      login_validation.map((validation) => validation.run(req))
+    );
+    const errs = validationResult(req);
+    if (!errs.isEmpty())
+      return res.status(400).json({
+        success: false,
+        message: errs.array(),
       });
-
+    try {
+      const { email, account, password } = req.body;
+      let user = null;
+      if (email || account) {
+        user = await User.findOne({
+          where: {
+            ...(email ? { email } : { account }),
+          },
+        });
+      }
       if (!user || user.isAdmin)
         return res.status(401).json({
           success: false,
           message: "Email or password incorret",
         });
-
       if (!bcrypt.compareSync(password, user.password))
         return res.status(401).json({
           success: false,
@@ -116,14 +101,11 @@ const authController = {
         account: user.account,
         isAdmin: user.isAdmin,
       };
-
       const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: "3d",
+        expiresIn: "1d",
       });
-
       const userData = user.toJSON();
       delete userData.password;
-
       return res.status(200).json({
         success: true,
         data: {
@@ -135,14 +117,92 @@ const authController = {
       console.log(error);
     }
   },
+  // ---------------------------------------------
+  sendPwdResetEmail: async (req, res, next) => {
+    try {
+      const { email } = req.body;
+      const user = await User.findOne({
+        where: { email },
+      });
+      if (!user)
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+
+      const reset_token = jwt.sign(
+        { userId: user.id },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+      );
+      // 前端重設連結
+      const reset_url = `http://localhost:8080/reset-password?token=${reset_token}`;
+
+      mail_html = `
+        <body>
+          <div>Hi <strong>${user.name}</strong>,</div>
+          <br />
+          <p>You requested a password reset. Click the link below to reset your password:</p>
+          <p><strong><a href=${reset_url}>Reset Password</a></strong></p>
+          <p>If you did'nt request this, please ignore this email.</p>
+          <br />
+          <br />
+          <p>Regards,</p>
+          <p>Cafeteria Admin Team</p>
+        </body>
+      `;
+      await sendEmail(email, "Reset Password", "");
+      return res.status(200).json({
+        success: true,
+        message: "Reset email sent",
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error,
+      });
+    }
+  },
+  resetPassword: async (req, res, next) => {
+    try {
+      const { token } = req.params;
+      const { password } = req.body;
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const { userId } = decoded;
+      const user = await User.findById(userId);
+      if (!user)
+        return res.status(404).json({
+          success: false,
+          message: "User not found",
+        });
+      const hash = await bcrypt.hash(password, 10);
+      user.password = hash;
+      await user.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Password reset success",
+      });
+    } catch (error) {
+      return res.status(500).json({
+        success: false,
+        message: error,
+      });
+    }
+  },
   adminLogin: async (req, res, next) => {
+    await Promise.all(
+      admin_login_validation.map((validation) => validation.run(req))
+    );
+    const errs = validationResult(req);
+    if (!errs.isEmpty())
+      return res.status(400).json({
+        success: false,
+        message: errs.array(),
+      });
+
     try {
       const { email, password } = req.body;
-      if (!email || !password)
-        return res.status(400).json({
-          success: false,
-          message: "Email, password cannot be blank",
-        });
       const user = await User.findOne({ where: { email } });
       if (!user || !user.isAdmin)
         return res.status(401).json({
@@ -158,6 +218,7 @@ const authController = {
       const payload = {
         id: user.id,
         email: user.email,
+        account: user.account,
         isAdmin: user.isAdmin,
       };
 
