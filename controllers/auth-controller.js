@@ -94,9 +94,7 @@ const authController = {
           message: "Email, password cannot be blank",
         });
 
-      const user = await User.findOne({
-        where: { email },
-      });
+      const user = await User.findOne({ where: { email } });
 
       if (!user || user.isAdmin)
         return res.status(401).json({
@@ -104,10 +102,11 @@ const authController = {
           message: "Email or password incorret",
         });
 
-      if (!bcrypt.compareSync(password, user.password))
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch)
         return res.status(401).json({
           success: false,
-          message: "Email or password incorret",
+          message: "Email or password incorrect",
         });
 
       const payload = {
