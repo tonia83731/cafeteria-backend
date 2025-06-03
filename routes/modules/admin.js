@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const upload = require("../../middleware/multer");
 const adminProductController = require("../../controllers/admin/product-controller");
-const adminCouponController = require("../../controllers/admin/coupon-controller");
+// const adminCouponController = require("../../controllers/admin/coupon-controller");
 const adminOrderController = require("../../controllers/admin/order-controller");
 
 router.get("/products/:productId", adminProductController.getProduct);
@@ -20,16 +20,16 @@ router.delete(
   adminProductController.deleteProduct
 );
 // V
-router.get("/coupons/:couponId", adminCouponController.getCoupon);
+// router.get("/coupons/:couponId", adminCouponController.getCoupon);
 // V
-router.patch(
-  "/coupons/:couponId/published",
-  adminCouponController.publishedCoupon
-);
+// router.patch(
+//   "/coupons/:couponId/published",
+//   adminCouponController.publishedCoupon
+// );
 // V
-router.put("/coupons/:couponId/updated", adminCouponController.editCoupon);
+// router.put("/coupons/:couponId/updated", adminCouponController.editCoupon);
 // V
-router.delete("/coupons/:couponId/deleted", adminCouponController.deleteCoupon);
+// router.delete("/coupons/:couponId/deleted", adminCouponController.deleteCoupon);
 
 router.patch(
   "/orders/:orderId/updated-status",
@@ -44,8 +44,8 @@ router.post(
   adminProductController.addProduct
 );
 
-router.get("/coupons", adminCouponController.getCoupons);
-router.post("/coupons/add", adminCouponController.addCoupon);
+// router.get("/coupons", adminCouponController.getCoupons);
+// router.post("/coupons/add", adminCouponController.addCoupon);
 
 router.get("/orders", adminOrderController.getOrders);
 

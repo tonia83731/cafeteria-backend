@@ -7,9 +7,9 @@ const authController = {
   // edit here
   register: async (req, res, next) => {
     try {
-      const { name, email, password, account } = req.body;
+      const { name, email, password, account, phone } = req.body;
 
-      if (!name || !email || !password || !account)
+      if (!name || !email || !password || !account || !phone)
         return res.status(400).json({
           success: false,
           message: "Name, email, password, account are required.",
@@ -27,13 +27,14 @@ const authController = {
           message: "Invalid email.",
         });
 
-      const existingEmail = await User.findOne({
-        where: { email },
-      });
-
-      const existingAccount = await User.findOne({
-        where: { account },
-      });
+      const [existingEmail, existingAccount] = await Promise.all([
+        User.findOne({
+          where: { email },
+        }), 
+        User.findOne({
+          where: { account },
+        })
+      ])
 
       if (existingEmail || existingAccount)
         return res.status(400).json({
@@ -179,6 +180,9 @@ const authController = {
       console.log(error);
     }
   },
+  forgotPassword: async (req, res, next) => {
+    
+  }
 };
 
 module.exports = authController;

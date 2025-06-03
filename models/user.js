@@ -4,14 +4,13 @@ module.exports = (sequelize, DataTypes) => {
     "User",
     {
       name: DataTypes.STRING,
-      email: DataTypes.STRING,
       account: DataTypes.STRING,
-      password: DataTypes.STRING,
-      address: DataTypes.STRING,
-      phone: DataTypes.STRING,
-      isAdmin: DataTypes.BOOLEAN,
       language: DataTypes.STRING,
-      invoice: DataTypes.STRING,
+      email: DataTypes.STRING,
+      password: DataTypes.STRING,
+      phone: DataTypes.STRING,
+      address: DataTypes.STRING,
+      isAdmin: DataTypes.BOOLEAN,
     },
     {
       modelName: "User",
@@ -20,20 +19,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   User.associate = function (models) {
-    User.hasMany(models.Discount, {
-      foreignKey: "userId",
-    });
-    User.belongsToMany(models.Product, {
-      through: models.Wish,
-      foreignKey: "userId",
-      as: "WishedProducts",
-    });
-    User.hasOne(models.Cart, {
-      foreignKey: "userId",
-    });
-    User.hasMany(models.Order, {
-      foreignKey: "userId",
-    });
+    
   };
   return User;
 };

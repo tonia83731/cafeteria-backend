@@ -9,11 +9,9 @@ module.exports = (sequelize, DataTypes) => {
       recipientAddress: DataTypes.STRING,
       shipping: DataTypes.INTEGER,
       payment: DataTypes.INTEGER,
-      discountId: DataTypes.INTEGER,
-      discountPrice: DataTypes.INTEGER,
-      tax: DataTypes.INTEGER,
-      productPrice: DataTypes.INTEGER,
-      total: DataTypes.INTEGER,
+      userCouponId: DataTypes.INTEGER,
+      discountAmount: DataTypes.INTEGER,
+      totalPrice: DataTypes.INTEGER,
       status: DataTypes.INTEGER,
     },
     {
@@ -23,21 +21,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   Order.associate = function (models) {
-    Order.hasMany(models.OrderItem, {
-      foreignKey: "orderId",
-    });
-    Order.belongsToMany(models.Product, {
-      through: models.OrderItem,
-      foreignKey: "orderId",
-      otherKey: "productId",
-      as: "Products",
-    });
-    Order.belongsTo(models.Discount, {
-      foreignKey: "discountId",
-    });
-    Order.belongsTo(models.User, {
-      foreignKey: "userId",
-    });
+    
   };
   return Order;
 };

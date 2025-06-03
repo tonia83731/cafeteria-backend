@@ -4,6 +4,12 @@ module.exports = (sequelize, DataTypes) => {
     "Cart",
     {
       userId: DataTypes.INTEGER,
+      productId: DataTypes.INTEGER,
+      quantity: DataTypes.INTEGER,
+      sizeId: DataTypes.INTEGER,
+      ice: DataTypes.INTEGER,
+      sugar: DataTypes.INTEGER,
+      itemTotal: DataTypes.INTEGER,
     },
     {
       modelName: "Cart",
@@ -12,18 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   Cart.associate = function (models) {
-    Cart.hasMany(models.CartItem, {
-      foreignKey: "cartId",
-    });
-    Cart.belongsTo(models.User, {
-      foreignKey: "userId",
-    });
-    Cart.belongsToMany(models.Product, {
-      through: models.CartItem,
-      foreignKey: "cartId",
-      otherKey: "productId",
-      as: "Products",
-    });
+    
   };
   return Cart;
 };

@@ -11,7 +11,7 @@ const auth = require("./modules/auth");
 const comment = require("./modules/comment");
 const user = require("./modules/user");
 const wish = require("./modules/wish");
-const discount = require("./modules/discount");
+// const discount = require("./modules/discount");
 const cart = require("./modules/cart");
 const order = require("./modules/order");
 const product = require("./modules/product");
@@ -30,7 +30,7 @@ router.use(
   productController.getProductsIncludeWish
 );
 router.use("/wishes", authenticated, authenticatedUser, wish);
-router.use("/discounts", authenticated, authenticatedUser, discount);
+// router.use("/discounts", authenticated, authenticatedUser, discount);
 router.use("/carts", authenticated, authenticatedUser, cart);
 router.use("/orders", authenticated, authenticatedUser, order);
 router.use("/admin", authenticated, authenticatedAdmin, admin);

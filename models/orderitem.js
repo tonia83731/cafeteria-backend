@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
       size: DataTypes.INTEGER,
       ice: DataTypes.INTEGER,
       sugar: DataTypes.INTEGER,
-      price: DataTypes.INTEGER,
+      itemPrice: DataTypes.INTEGER,
     },
     {
       modelName: "OrderItem",
@@ -18,12 +18,7 @@ module.exports = (sequelize, DataTypes) => {
     }
   );
   OrderItem.associate = function (models) {
-    OrderItem.belongsTo(models.Product, {
-      foreignKey: "productId",
-    });
-    OrderItem.belongsTo(models.Order, {
-      foreignKey: "orderId",
-    });
+   
   };
   return OrderItem;
 };

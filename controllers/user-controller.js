@@ -1,4 +1,4 @@
-const { User, Cart, CartItem } = require("../models");
+const { User, Cart } = require("../models");
 
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
@@ -7,12 +7,7 @@ const userController = {
   checkedUser: async (req, res, next) => {
     const id = req.user.id;
     const user = await User.findByPk(id, {
-      include: [
-        {
-          model: Cart,
-          include: [CartItem],
-        },
-      ],
+      include: [Cart],
     });
 
     return res.status(200).json({
@@ -25,8 +20,8 @@ const userController = {
             language: user.language,
           }
         : null,
-      cartQty: user
-        ? user.Cart.CartItems.reduce((acc, curr) => acc + curr.quantity, 0)
+      cartQty: user.Cart
+        ? user.Cart.reduce((acc, curr) => acc + curr.quantity, 0)
         : 0,
     });
   },
@@ -60,7 +55,7 @@ const userController = {
     try {
       const id = req.user.id;
       const { account } = req.params;
-      const { name, email, password, phone, address, language, invoice } =
+      const { name, email, password, phone, address, language } =
         req.body;
 
       const user = await User.findOne({
